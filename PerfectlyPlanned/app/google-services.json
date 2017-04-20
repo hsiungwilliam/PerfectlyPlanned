@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "576201760165",
+    "firebase_url": "https://perfectly-planned-68ebf.firebaseio.com",
+    "project_id": "perfectly-planned-68ebf",
+    "storage_bucket": "perfectly-planned-68ebf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:576201760165:android:634ebd6e9cf0a334",
+        "android_client_info": {
+          "package_name": "com.jkls.android.perfectlyplanned"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "576201760165-lrldijfkl866q3q03u012nn2ja7oeinm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDRFsYpMIo857JPXeWo7uCZuyP3SajAag"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -109,7 +109,6 @@ public class CheckEmail extends AsyncTask{
             public NotificationActionService() {
                 //System.out.println("I made it againa");
                 super("NotificationActionService");
-
             }
 
             @Override

@@ -20,6 +20,9 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.text.DateFormat;
+import java.util.Date;
 //import com.google.firebase.quickstart.database.models.User;
 /* TODO grab sign in from github
     On success call intent to switch to activity with contacts
@@ -89,12 +92,13 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                       //  hideProgressDialog();
 
                         if (task.isSuccessful()) {
-                            onAuthSuccess(task.getResult().getUser());
+                            //Gets the current date and time to be used for comparison later
+                            String currentDateTime = new Date().toString();
+                            onAuthSuccess(task.getResult().getUser(), currentDateTime);
                         } else {
                             FirebaseAuthException e = (FirebaseAuthException)task.getException();
                             Toast.makeText(SignInActivity.this, "Failed Sign in: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Toast.makeText(SignInActivity.this, "Sign In Failed",
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignInActivity.this, "Sign In Failed", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -119,7 +123,9 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                        // hideProgressDialog();
 
                         if (task.isSuccessful()) {
-                            onAuthSuccess(task.getResult().getUser());
+                            //Gets the current date and time to be used for comparison later
+                            String currentDateTime = new Date().toString();
+                            onAuthSuccess(task.getResult().getUser(), currentDateTime);
                         } else {
                             FirebaseAuthException e = (FirebaseAuthException)task.getException();
                             Toast.makeText(SignInActivity.this, "Failed Registration: "+e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -130,7 +136,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 });
     }
 
-    private void onAuthSuccess(FirebaseUser user) {
+    private void onAuthSuccess(FirebaseUser user, String currDateTime) {
         String username = usernameFromEmail(user.getEmail());
 
         // Write new user
@@ -147,7 +153,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
         //emails.check(host, mailStoreType, user_name, pass_word);
 
-        new CheckEmail(getBaseContext(), user_name, pass_word).execute("");
+        new CheckEmail(getBaseContext(), user_name, pass_word, currDateTime).execute("");
        finish();
     }
 

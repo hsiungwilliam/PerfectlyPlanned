@@ -2,6 +2,7 @@ package com.jkls.android.perfectlyplanned;
 
 import android.app.Activity;
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -14,7 +15,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,6 +29,7 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.util.DebugUtils;
 import android.util.Log;
 import android.widget.Toast;
+import android.content.SharedPreferences;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -41,16 +46,17 @@ import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
 
+import static android.R.attr.format;
 import static android.content.ContentValues.TAG;
 
 /**
  * Created by Jon-kyle on 4/10/2017.
  */
 
-//Test Change
 public class CheckEmail extends AsyncTask{
     String username1;
     String password1;
+    String currDateTime1;
     Intent intent;
     private Context mContext;
     String title;
@@ -58,48 +64,43 @@ public class CheckEmail extends AsyncTask{
     String loc;
     Address from;
     int notificationId = 0;
-    public CheckEmail(Context context, String user_name, String pass_word){
+    public static final String PREFS_NAME = "MyPrefsFile";
+
+    public CheckEmail(Context context, String user_name, String pass_word, String currDateTime){
         mContext = context;
         username1 = user_name;
         password1 = pass_word;
-
-
+        currDateTime1 = currDateTime;
     }
 
-
-
     public class NotificationUtils {
-       public String ACTION_1;
+        public String ACTION_1;
 
-        public  void displayNotification(Context context) {
-            final int NOTIFICATION_ID = 1;
-          //  System.out.println("I made it againa");
-             ACTION_1 = "action_1";
-            Intent action1Intent = new Intent(context, NotificationActionService.class)
-                    .setAction(ACTION_1);
+        public  void displayNotification(Context context, int ID) {
+            int NOTIFICATION_ID = ID;
+            //final int NOTIFICATION_ID = 1;
+
+            ACTION_1 = "action_1";
+            Intent action1Intent = new Intent(context, NotificationActionService.class).setAction(ACTION_1);
             action1Intent.putExtra("title", title);
             action1Intent.putExtra("date", date);
             action1Intent.putExtra("loc", loc);
 
+            PendingIntent action1PendingIntent = PendingIntent.getService(context, 0, action1Intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            PendingIntent action1PendingIntent = PendingIntent.getService(context, 0,
-                    action1Intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            NotificationCompat.Builder notificationBuilder =
-                    new NotificationCompat.Builder(context)
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
             .setSmallIcon(R.drawable.logo_big)
             .setContentTitle("Perfect Planner")
+                    .setAutoCancel(true)
             .setContentText(title + "\n" + "from: " + from)
             .setContentIntent(action1PendingIntent)
             .setLights(Color.RED, 3000, 3000);
-                            //.addAction(new NotificationCompat.Action(R.drawable.logo_small,
-                                //   "Action 1", action1PendingIntent));
+            //.addAction(new NotificationCompat.Action(R.drawable.logo_small, "Action 1", action1PendingIntent));
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
 
             System.out.println("we made it");
-
         }
 
         /*public class NotificationActionService extends IntentService {
@@ -127,11 +128,9 @@ public class CheckEmail extends AsyncTask{
     }
 
 
-
     public void addevent(String title, String date, String loc, Address from  ){
 
-       /* NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext);
-
+        /* NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext);
         mBuilder.setSmallIcon(R.drawable.logo_big);
         mBuilder.setContentTitle("Perfect Planner");
         mBuilder.setContentText(title + "\n" + "from: " + from);
@@ -139,7 +138,7 @@ public class CheckEmail extends AsyncTask{
         mBuilder.setSound(Uri.parse("uri://sadfasdfasdf.mp3"));
         NotificationManager mNotificationManager = (NotificationManager) mContext.getSystemService(mContext.NOTIFICATION_SERVICE);
         System.out.println("I made it");
-// notificationID allows you to update the notification later on.
+        // notificationID allows you to update the notification later on.
         mNotificationManager.notify(notificationId,mBuilder.build());*/
         System.out.println("I made it againa");
         Calendar cal = Calendar.getInstance();
@@ -154,7 +153,7 @@ public class CheckEmail extends AsyncTask{
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         notificationId++;
         mContext.startActivity(intent);
-     //   ((Activity)mContext).finish();
+        //   ((Activity)mContext).finish();
 
         /*var event = CalendarApp.getDefaultCalendar().createAllDayEvent('Apollo 11 Landing',
                 new Date('July 20, 1969'));
@@ -163,13 +162,16 @@ public class CheckEmail extends AsyncTask{
     }
 
 
-
-
-    public  void check(String host, String storeType, String user,
-                             String password)
+    public  void check(String host, String storeType, String user, String password)
     {
+        SimpleDateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss z yyyy");
 
         try {
+            //Retrieving the last date and time the app was run
+            SharedPreferences lastDate = mContext.getSharedPreferences(PREFS_NAME, 0);
+            //The second value for getString is the default value
+            String lastDateTime = lastDate.getString("currdatetime", "Mon Jan 01 08:00:00 EDT 2000");
+            Date lastdate = format.parse(lastDateTime);
 
             //create properties field
             Properties properties = new Properties();
@@ -187,13 +189,12 @@ public class CheckEmail extends AsyncTask{
             properties.setProperty("mail.imaps.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
             properties.setProperty("mail.imaps.socketFactory.fallback", "false");
 
-          //  properties.put( "mail.pop3.auth", "true" );
+            //  properties.put( "mail.pop3.auth", "true" );
             Session emailSession = Session.getDefaultInstance(properties);
 
             //create the POP3 store object and connect with the pop server
             Store store = emailSession.getStore("imaps");
-
-         store.connect(host, user, password);
+            store.connect(host, user, password);
 
             //create the folder object and open it
             Folder emailFolder = store.getFolder("INBOX");
@@ -202,42 +203,66 @@ public class CheckEmail extends AsyncTask{
             // retrieve the messages from the folder in an array and print it
             Message[] messages = emailFolder.getMessages();
             System.out.println("messages.length---" + messages.length);
+            int count = 1;
 
-            for (int i = 0, n = messages.length; i < n; i++) {
-                Message message = messages[i];
+            for (int n = messages.length-1; n >= 0; n--) {
+                Message message = messages[n];
 
+                //This gets the date received and converts it to a string
+                String currentDate = message.getReceivedDate().toString();
+                //This takes the date as a string and formats it to match the last date
+                Date currDate = format.parse(currentDate);
+
+                if(currDate.before(lastdate)) {
+                    System.out.println("made it");
+                    break;
+                }
+                else{
                     System.out.println("---------------------------------");
-                    System.out.println("Email Number " + (i + 1));
-                    System.out.println("Subject: " + message.getSubject());
+                    System.out.println("Email Number " + (messages.length-n));
+                    if (message.getSubject() == null)
+                        System.out.println("Subject: (no subject)");
+                    else
+                        System.out.println("Subject: " + message.getSubject());
                     System.out.println("From: " + message.getFrom()[0]);
 
-                if(message.getSubject().contains("Event")) {
-                    String body = message.getSubject();
-                    from = message.getFrom()[0];
-                   title = "";
-                   loc = "";
-                    date = "";
-              // System.out.print("Text: ");
-                String[] splited = body.split("\\s+");
-                if(splited.length>=2)
-                    title = splited[1];
-                if(splited.length>=4)
-                    date = splited[3];
-                if(splited.length>=6)
-                    loc = splited[5];
-                NotificationUtils news = new NotificationUtils();
-                    news.displayNotification(mContext);
-                    Toast.makeText(mContext, "Scanning finished",
-                            Toast.LENGTH_SHORT).show();
-                // addevent(title, date, loc, from);
-                    //Toast.makeText(CheckEmail.this, "Failed Registration: ", Toast.LENGTH_SHORT).show();
+                    if (message.getSubject() == null);
+                    else if(message.getSubject().contains("Event")) {
+                        String body = message.getSubject();
+                        from = message.getFrom()[0];
+                        title = "";
+                        loc = "";
+                        date = "";
+                        // System.out.print("Text: ");
+                        String[] splited = body.split("\\s+");
+                        if(splited.length>=2)
+                            title = splited[1];
+                        if(splited.length>=4)
+                            date = splited[3];
+                        if(splited.length>=6)
+                            loc = splited[5];
+                        NotificationUtils news = new NotificationUtils();
+                        news.displayNotification(mContext, count);
+                        count++;
+                        //This Toast creates "java.lang.RuntimeException: Can't create handler inside thread that has not called Looper.prepare()"
+                        //Toast.makeText(mContext, "Scanning finished", Toast.LENGTH_SHORT).show();
 
+                        //addevent(title, date, loc, from);
+                        //Toast.makeText(CheckEmail.this, "Failed Registration: ", Toast.LENGTH_SHORT).show();
+
+                    }
                 }
             }
 
+            //Saving the current time for next comparison because we have reached an email that has already been checked
+            SharedPreferences settings = mContext.getSharedPreferences(PREFS_NAME, 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.clear().commit();
+            editor.putString("currdatetime", currDateTime1);
+            editor.commit();
+
             //close the store and folder objects
             emailFolder.close(false);
-
             store.close();
 
         } catch (NoSuchProviderException e) {
@@ -256,12 +281,22 @@ public class CheckEmail extends AsyncTask{
         }
     }
 
-    public  void main(String[] args) {
+    public  void main(String[] args, String currDateTime) {
 
+        String host = "imaps.gmail.com";
+        String mailStoreType = "imaps";
+        String username = args[1];
+        String password = args[2];
+        Log.d(TAG, username);
+        Log.d(TAG, password);
+
+        /*
+        This was the original code:
         String host = "imaps.gmail.com";// change accordingly
         String mailStoreType = "imaps";
         String username = "jkls2713@gmail.com";// change accordingly
         String password = "sticks27";// change accordingly
+        */
 
         check(host, mailStoreType, username, password);
 
@@ -284,10 +319,9 @@ public class CheckEmail extends AsyncTask{
         String mailStoreType = "imaps";
         String username = username1;// change accordingly
         String password = password1;// change accordingly
-         check(host, mailStoreType, username, password);
+        check(host, mailStoreType, username, password);
 
         return null;
     }
-
 
 }

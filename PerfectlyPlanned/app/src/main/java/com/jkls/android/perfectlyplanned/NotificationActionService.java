@@ -4,6 +4,8 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.provider.CalendarContract;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import javax.mail.Address;
@@ -34,7 +36,7 @@ public class NotificationActionService extends IntentService {
         if (intent != null) {
             String action = intent.getAction();
             String date = intent.getStringExtra("date");
-                    String loc = intent.getStringExtra("loc");;
+            String loc = intent.getStringExtra("loc");
             String title = intent.getStringExtra("title");
 
             // addevent(title, date, loc, from);
@@ -68,37 +70,40 @@ public class NotificationActionService extends IntentService {
     }
 
     public void addevent(String title, String date, String loc ){
+        try {
+            /* NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext);
+            mBuilder.setSmallIcon(R.drawable.logo_big);
+            mBuilder.setContentTitle("Perfect Planner");
+            mBuilder.setContentText(title + "\n" + "from: " + from);
+            mBuilder.setLights(Color.RED, 3000, 3000);
+            mBuilder.setSound(Uri.parse("uri://sadfasdfasdf.mp3"));
+            NotificationManager mNotificationManager = (NotificationManager) mContext.getSystemService(mContext.NOTIFICATION_SERVICE);
+            System.out.println("I made it");
+            // notificationID allows you to update the notification later on.
+            mNotificationManager.notify(notificationId,mBuilder.build());*/
 
-       /* NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext);
+            System.out.println("I made it againa");
+            Calendar cal = Calendar.getInstance();
+            Intent calendarIntent = new Intent(Intent.ACTION_INSERT, CalendarContract.Events.CONTENT_URI);
+            calendarIntent.setType("vnd.android.cursor.item/event");
+            calendarIntent.putExtra("beginTime", cal.getTimeInMillis());
+            //calendarIntent.putExtra(CalendarContract.Events.DTSTART, date);
+            DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+            Calendar calDate  = Calendar.getInstance();calDate.setTime(df.parse(date));
+            calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, calDate.getTimeInMillis());
+            //calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis());
+            calendarIntent.putExtra(CalendarContract.Events.TITLE, title);
+            calendarIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, loc);
 
-        mBuilder.setSmallIcon(R.drawable.logo_big);
-        mBuilder.setContentTitle("Perfect Planner");
-        mBuilder.setContentText(title + "\n" + "from: " + from);
-        mBuilder.setLights(Color.RED, 3000, 3000);
-        mBuilder.setSound(Uri.parse("uri://sadfasdfasdf.mp3"));
-        NotificationManager mNotificationManager = (NotificationManager) mContext.getSystemService(mContext.NOTIFICATION_SERVICE);
-        System.out.println("I made it");
-// notificationID allows you to update the notification later on.
-        mNotificationManager.notify(notificationId,mBuilder.build());*/
-        System.out.println("I made it againa");
-        Calendar cal = Calendar.getInstance();
-        Intent calendarIntent = new Intent(Intent.ACTION_INSERT, CalendarContract.Events.CONTENT_URI);
-        calendarIntent.setType("vnd.android.cursor.item/event");
-        calendarIntent.putExtra("beginTime", cal.getTimeInMillis());
-        calendarIntent.putExtra(CalendarContract.Events.DTSTART, date);
-        //calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis());
-        calendarIntent.putExtra(CalendarContract.Events.TITLE, title);
-        calendarIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, loc);
+            calendarIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            notificationId++;
+            this.startActivity(calendarIntent);
+            //   ((Activity)mContext).finish();
 
-        calendarIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        notificationId++;
-        this.startActivity(calendarIntent);
-        //   ((Activity)mContext).finish();
-
-        /*var event = CalendarApp.getDefaultCalendar().createAllDayEvent('Apollo 11 Landing',
-                new Date('July 20, 1969'));
-        Logger.log('Event ID: ' + event.getId());*/
-
+            /*var event = CalendarApp.getDefaultCalendar().createAllDayEvent('Apollo 11 Landing',
+                    new Date('July 20, 1969'));
+            Logger.log('Event ID: ' + event.getId());*/
+        }
+        catch(Exception e){}
     }
-
 }

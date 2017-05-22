@@ -47,7 +47,7 @@ import static android.content.ContentValues.TAG;
  * Created by Jon-kyle on 4/10/2017.
  */
 
-
+//Test Change
 public class CheckEmail extends AsyncTask{
     String username1;
     String password1;

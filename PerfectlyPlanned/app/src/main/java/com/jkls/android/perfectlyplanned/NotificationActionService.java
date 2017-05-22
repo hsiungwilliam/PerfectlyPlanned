@@ -38,13 +38,15 @@ public class NotificationActionService extends IntentService {
             String date = intent.getStringExtra("date");
             String loc = intent.getStringExtra("loc");
             String title = intent.getStringExtra("title");
+            String time = intent.getStringExtra("time");
 
             // addevent(title, date, loc, from);
             //  DebugUtils.log("Received notification action: " + action);
-            if (ACTION_1.equals(action)) {
+            // There is no need for this if statement anymore
+            if (!ACTION_1.equals(action)) {
                 // TODO: handle action 1.
                 System.out.println("heyp0");
-                addevent(title, date, loc);
+                addevent(title, date, loc, time);
                 // If you want to cancel the notification: NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID);
             }else{
                 System.out.println("heyp");
@@ -69,7 +71,7 @@ public class NotificationActionService extends IntentService {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    public void addevent(String title, String date, String loc ){
+    public void addevent(String title, String date, String loc, String time ){
         try {
             /* NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext);
             mBuilder.setSmallIcon(R.drawable.logo_big);
@@ -83,13 +85,22 @@ public class NotificationActionService extends IntentService {
             mNotificationManager.notify(notificationId,mBuilder.build());*/
 
             System.out.println("I made it againa");
+            String[] splited = time.split(":");
+            int hour = Integer.parseInt(splited[0]);
+            int minute = Integer.parseInt(splited[1]);
             Calendar cal = Calendar.getInstance();
             Intent calendarIntent = new Intent(Intent.ACTION_INSERT, CalendarContract.Events.CONTENT_URI);
             calendarIntent.setType("vnd.android.cursor.item/event");
             calendarIntent.putExtra("beginTime", cal.getTimeInMillis());
             //calendarIntent.putExtra(CalendarContract.Events.DTSTART, date);
             DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-            Calendar calDate  = Calendar.getInstance();calDate.setTime(df.parse(date));
+            Calendar calDate  = Calendar.getInstance();
+            calDate.setTime(df.parse(date));
+            if(splited[2].equals("PM"))
+                calDate.set(Calendar.HOUR_OF_DAY, hour+12);
+            else
+                calDate.set(Calendar.HOUR_OF_DAY, hour);
+            calDate.set(Calendar.MINUTE, minute);
             calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, calDate.getTimeInMillis());
             //calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis());
             calendarIntent.putExtra(CalendarContract.Events.TITLE, title);

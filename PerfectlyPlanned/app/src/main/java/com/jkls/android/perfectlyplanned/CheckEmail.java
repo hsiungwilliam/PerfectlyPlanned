@@ -62,6 +62,7 @@ public class CheckEmail extends AsyncTask{
     String title;
     String date;
     String loc;
+    String time;
     Address from;
     int notificationId = 0;
     public static final String PREFS_NAME = "MyPrefsFile";
@@ -78,13 +79,13 @@ public class CheckEmail extends AsyncTask{
 
         public  void displayNotification(Context context, int ID) {
             int NOTIFICATION_ID = ID;
-            //final int NOTIFICATION_ID = 1;
 
-            ACTION_1 = "action_1";
+            ACTION_1 = Integer.toString(ID);
             Intent action1Intent = new Intent(context, NotificationActionService.class).setAction(ACTION_1);
             action1Intent.putExtra("title", title);
             action1Intent.putExtra("date", date);
             action1Intent.putExtra("loc", loc);
+            action1Intent.putExtra("time", time);
 
             PendingIntent action1PendingIntent = PendingIntent.getService(context, 0, action1Intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -214,7 +215,6 @@ public class CheckEmail extends AsyncTask{
                 Date currDate = format.parse(currentDate);
 
                 if(currDate.before(lastdate)) {
-                    System.out.println("made it");
                     break;
                 }
                 else{
@@ -233,14 +233,36 @@ public class CheckEmail extends AsyncTask{
                         title = "";
                         loc = "";
                         date = "";
+                        time = "";
                         // System.out.print("Text: ");
                         String[] splited = body.split("\\s+");
-                        if(splited.length>=2)
+                        int p = 2;
+                        if(splited.length>=2) {
                             title = splited[1];
-                        if(splited.length>=4)
-                            date = splited[3];
-                        if(splited.length>=6)
-                            loc = splited[5];
+                            //Iterate for spaces in between Title
+                            while (!splited[p].equals("Date")){
+                                title = title + " " + splited[p];
+                                p++;
+                            }
+                        }
+                        if(splited.length>=4) {
+                            p++; //Index after the word "Date"
+                            date = splited[p];
+                        }
+                        if(splited.length>=6){
+                            p = p + 2; //Skip previous date and the word "Location"
+                            loc = splited[p];
+                            p++;
+                            while (!splited[p].equals("Time")){
+                                loc = loc + " " + splited[p];
+                                p++;
+                            }
+                        }
+                        if(splited.length>=8) {
+                            p++;
+                            time = splited[p] + ":" + splited[p+1];
+                        }
+
                         NotificationUtils news = new NotificationUtils();
                         news.displayNotification(mContext, count);
                         count++;
@@ -255,11 +277,11 @@ public class CheckEmail extends AsyncTask{
             }
 
             //Saving the current time for next comparison because we have reached an email that has already been checked
-            SharedPreferences settings = mContext.getSharedPreferences(PREFS_NAME, 0);
+            /*SharedPreferences settings = mContext.getSharedPreferences(PREFS_NAME, 0);
             SharedPreferences.Editor editor = settings.edit();
             editor.clear().commit();
             editor.putString("currdatetime", currDateTime1);
-            editor.commit();
+            editor.commit();*/
 
             //close the store and folder objects
             emailFolder.close(false);

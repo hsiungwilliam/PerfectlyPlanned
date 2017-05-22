@@ -62,6 +62,7 @@ public class CheckEmail extends AsyncTask{
     String title;
     String date;
     String loc;
+    String time;
     Address from;
     int notificationId = 0;
     public static final String PREFS_NAME = "MyPrefsFile";
@@ -233,14 +234,43 @@ public class CheckEmail extends AsyncTask{
                         title = "";
                         loc = "";
                         date = "";
+                        time = "";
                         // System.out.print("Text: ");
                         String[] splited = body.split("\\s+");
-                        if(splited.length>=2)
+                        int p = 2;
+                        if(splited.length>=2) {
                             title = splited[1];
-                        if(splited.length>=4)
-                            date = splited[3];
-                        if(splited.length>=6)
-                            loc = splited[5];
+                            //Iterate for spaces in between Title
+                            while (splited[p] != "Date"){
+                                title = title + " " + splited[p];
+                                p++;
+                            }
+                        }
+                        if(splited.length>=4) {
+                            p++; //Index after the word "Date"
+                            date = splited[p];
+                        }
+                        if(splited.length>=6) {
+                            p = p + 2; //Skip previous date and the word "Location"
+                            loc = splited[p];
+                            p++;
+                            while (splited[p] != "Time"){
+                                loc = loc + " " + splited[p];
+                                p++;
+                            }
+                        }
+                        if(splited.length>=8) {
+                            p++;
+                            time = splited[p] + " " + splited[p+1];
+                        }
+
+                        //Testing new parse
+                        System.out.println("\nTitle: " + title);
+                        System.out.println("Location: " + loc);
+                        System.out.println("Date: " + date);
+                        System.out.println("Time: " + time + "\n");
+
+
                         NotificationUtils news = new NotificationUtils();
                         news.displayNotification(mContext, count);
                         count++;

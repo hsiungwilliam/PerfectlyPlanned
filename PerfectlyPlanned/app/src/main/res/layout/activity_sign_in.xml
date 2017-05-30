@@ -11,6 +11,15 @@
                 tools:context="com.jkls.android.perfectlyplanned.SignInActivity">
 
 
+    <Button
+        android:id="@+id/button_send_sms"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/layout_buttons"
+        android:layout_below="@+id/layout_buttons"
+        android:layout_weight="1"
+        android:text="Send a text to erin to report a bug" />
+
     <ImageView
         android:id="@+id/icon"
         android:layout_width="wrap_content"
@@ -23,9 +32,9 @@
     android:id="@+id/layout_buttons"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_below="@+id/layout_password"
-    android:layout_centerHorizontal="true"
-    android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_below="@+id/layout_password"
+        android:layout_centerHorizontal="true">
 
     <Button
         android:id="@+id/button_sign_in"
@@ -40,7 +49,7 @@
         android:layout_height="wrap_content"
         android:text="Sign up" />
 
-</LinearLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layout_email_password"
@@ -86,4 +95,5 @@
             android:maxLines="1" />
 
     </LinearLayout>
+
 </RelativeLayout>

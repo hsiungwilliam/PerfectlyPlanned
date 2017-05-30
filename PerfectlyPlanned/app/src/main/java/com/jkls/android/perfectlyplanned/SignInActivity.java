@@ -2,6 +2,8 @@ package com.jkls.android.perfectlyplanned;
 
 import android.content.Intent;
 
+
+import android.telephony.SmsManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -39,10 +41,12 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
 
-  private EditText mEmailField;
+    private EditText mEmailField;
     private EditText mPasswordField;
     private Button mSignInButton;
     private Button mSignUpButton;
+    private Button mSendSmsButton;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +65,18 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         // Click listeners
         mSignInButton.setOnClickListener(this);
         mSignUpButton.setOnClickListener(this);
+
+        //Sending Text Message
+        mSendSmsButton = (Button) findViewById(R.id.button_send_sms);
+        mSendSmsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SmsManager sms = SmsManager.getDefault();
+                sms.sendTextMessage("8507121054", null, "This message was send through Perfectly Planned!", null, null);
+            }
+        });
+
+
     }
 
     @Override

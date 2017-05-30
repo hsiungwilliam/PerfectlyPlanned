@@ -65,7 +65,7 @@ public class CheckEmail extends AsyncTask{
     String time;
     Address from;
     int notificationId = 0;
-    public static final String PREFS_NAME = "MyPrefsFile";
+    public static final String PREFS_NAME = "MyTimeFile";
 
     public CheckEmail(Context context, String user_name, String pass_word, String currDateTime){
         mContext = context;
@@ -109,7 +109,6 @@ public class CheckEmail extends AsyncTask{
             public NotificationActionService() {
                 //System.out.println("I made it againa");
                 super("NotificationActionService");
-
             }
 
             @Override
@@ -163,15 +162,14 @@ public class CheckEmail extends AsyncTask{
     }
 
 
-    public  void check(String host, String storeType, String user, String password)
-    {
+    public  void check(String host, String storeType, String user, String password) {
         SimpleDateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss z yyyy");
 
         try {
             //Retrieving the last date and time the app was run
             SharedPreferences lastDate = mContext.getSharedPreferences(PREFS_NAME, 0);
-            //The second value for getString is the default value
-            String lastDateTime = lastDate.getString("currdatetime", "Mon Jan 01 08:00:00 EDT 2000");
+            //The second value for getString is just a random default value
+            String lastDateTime = lastDate.getString("currdatetime", "Mon May 01 08:00:00 EDT 2010");
             Date lastdate = format.parse(lastDateTime);
 
             //create properties field
@@ -304,7 +302,6 @@ public class CheckEmail extends AsyncTask{
     }
 
     public  void main(String[] args, String currDateTime) {
-
         String host = "imaps.gmail.com";
         String mailStoreType = "imaps";
         String username = args[1];
@@ -321,22 +318,17 @@ public class CheckEmail extends AsyncTask{
         */
 
         check(host, mailStoreType, username, password);
-
     }
 
     @Override
     protected Object doInBackground(Object[] params) {
         String host = "";
         if(username1.contains("gmail"))
-        host = "imap.gmail.com";// change accordingly
-        if(username1.contains("hotmail")){
+            host = "imap.gmail.com";// change accordingly
+        if(username1.contains("hotmail"))
             host = "imap.mail.outlook.com";
-            System.out.println("set it homie");
-        }
-        if(username1.contains("yahoo")){
+        if(username1.contains("yahoo"))
             host = "imap.mail.yahoo.com";
-            System.out.println("set it homie");
-        }
 
         String mailStoreType = "imaps";
         String username = username1;// change accordingly
@@ -345,5 +337,4 @@ public class CheckEmail extends AsyncTask{
 
         return null;
     }
-
 }

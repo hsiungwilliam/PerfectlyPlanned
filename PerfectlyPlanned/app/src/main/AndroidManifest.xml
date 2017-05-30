@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_CALENDAR"/>
     <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.WRITE_SMS" />
 
     <application
         android:allowBackup="true"
@@ -19,16 +22,30 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity
+            android:name=".SettingActivity"
+            android:label="@string/app_name">
+        </activity>
+        <activity
+            android:name=".HomePageActivity"
+            android:label="@string/app_name">
+        </activity>
 
         <service
             android:name=".EmailChecker"
             android:exported="false">
         </service>
         <service android:name=".CheckEmail$NotificationUtils$NotificationActionService"/>
+        <service android:name=".CheckText$SMSData">
+            <intent-filter android:priority="999" >
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </service>
         <service
             android:name=".NotificationActionService"
             android:exported="false">
         </service>
+        <receiver android:name=".InitializationActivity$goToCheckEmail" />
     </application>
 
 </manifest>

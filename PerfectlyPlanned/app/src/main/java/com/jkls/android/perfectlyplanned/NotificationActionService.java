@@ -40,6 +40,12 @@ public class NotificationActionService extends IntentService {
             String title = intent.getStringExtra("title");
             String time = intent.getStringExtra("time");
 
+            System.out.println(action);
+            System.out.println(title);
+            System.out.println(date);
+            System.out.println(loc);
+            System.out.println(time);
+
             // addevent(title, date, loc, from);
             //  DebugUtils.log("Received notification action: " + action);
             // There is no need for this if statement anymore

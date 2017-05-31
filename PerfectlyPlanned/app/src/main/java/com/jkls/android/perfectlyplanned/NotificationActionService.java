@@ -40,13 +40,6 @@ public class NotificationActionService extends IntentService {
             String title = intent.getStringExtra("title");
             String time = intent.getStringExtra("time");
 
-            System.out.println(action);
-            System.out.println(title);
-            System.out.println(date);
-            System.out.println(loc);
-            System.out.println(time);
-
-
             // addevent(title, date, loc, from);
             //  DebugUtils.log("Received notification action: " + action);
             // There is no need for this if statement anymore
@@ -91,7 +84,11 @@ public class NotificationActionService extends IntentService {
             // notificationID allows you to update the notification later on.
             mNotificationManager.notify(notificationId,mBuilder.build());*/
 
-            System.out.println("I made it againa");
+            System.out.println(title);
+            System.out.println(date);
+            System.out.println(loc);
+            System.out.println(time);
+
             String[] splited = time.split(":");
             int hour = Integer.parseInt(splited[0]);
             int minute = Integer.parseInt(splited[1]);

@@ -106,24 +106,32 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
 
     //Handles when the sign off button is clicked
     public void showSignOffButton(){
-        Log.d(TAG, "signoff");
-        //Im not sure if this is the best way but this lets the system know the user has signed off
-        //
-        //Also need to figure out a way to stop any alarms that are turned on here
-        //
-        SharedPreferences settings = mContext.getSharedPreferences(PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.clear().commit();
-        editor.putString("onExit", "Signoff");
-        editor.commit();
-        finish();
-        System.exit(0);
+        try {
+            Log.d(TAG, "signoff");
+            //Im not sure if this is the best way but this lets the system know the user has signed off and turns off any alarms
+            SharedPreferences settings = mContext.getSharedPreferences(PREFS_NAME, 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.clear().commit();
+            //editor.putString("onExit", "stuff");
+            editor.putString("checkSignoff", "True");
+            editor.commit();
+            new InitializationActivity(mContext, username1, password1, currDateTime1, false).execute("");
+            Thread.sleep(5000);
+            editor.clear().commit();
+            editor.putString("onExit", "Signoff");
+            editor.putString("checkSignoff", "False");
+            editor.commit();
+            finish();
+            System.exit(0);
+        }catch (Exception e) {
+            Log.d(TAG, "hey3");
+        }
     }
 
     @Override
     public void onClick(View v) {
         int i = v.getId();
-        if (i == R.id.button_update) {
+        if (i == R.id.button_check) {
             showCheckButton();
         } else if (i == R.id.button_exit) {
             showExitButton();

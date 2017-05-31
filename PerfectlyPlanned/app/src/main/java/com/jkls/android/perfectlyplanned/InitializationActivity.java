@@ -25,6 +25,7 @@ public class InitializationActivity extends AsyncTask{
     String username1;
     String password1;
     String currDateTime1;
+    String signoff;
     static String username2;
     static String password2;
     static String currDateTime2;
@@ -36,6 +37,7 @@ public class InitializationActivity extends AsyncTask{
     private Context mContext;
     public static final String PREFS_NAME = "MyEmailFrequencyFile";
     public static final String PREFS_NAME1 = "MyCheckOptionsFile";
+    public static final String PREFS_NAME2 = "MyExitFile";
 
     public InitializationActivity(Context context, String user_name, String pass_word, String currDateTime, Boolean settingsChange){
         mContext = context;
@@ -91,7 +93,6 @@ public class InitializationActivity extends AsyncTask{
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "StartEmailCheck");
             String emailOptions = intent.getExtras().getString("emailOptions");
-            System.out.println("Email option is: " + emailOptions);
             if(emailOptions.equals("Email"))
                 new CheckEmail(context, username2, password2, currDateTime2).execute("");
             else if (emailOptions.equals("Text"))
@@ -105,23 +106,39 @@ public class InitializationActivity extends AsyncTask{
 
     //Starts checking the emails/texts once a day
     public void registerAlarmDay(Context context) {
+        //This gets the current time
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
+
+        // Set the alarm to start at approximately 8:00 AM
+        /*Calendar calendar1 = Calendar.getInstance();
+        calendar1.setTimeInMillis(System.currentTimeMillis());
+        calendar1.set(Calendar.HOUR_OF_DAY, 8);*/
 
         try {
             Intent intent2 = new Intent(context, goToCheckEmail.class).putExtra("emailOptions", emailOptions);
             sender = PendingIntent.getBroadcast(context, 0, intent2, 0);
             // Schedule the alarm
             alarm = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
-            //alarm.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, calendar.getTimeInMillis(, 86400000, sender2);//24 hr interval
-            alarm.setRepeating(AlarmManager.RTC_WAKEUP, (calendar.getTimeInMillis()), 90000, sender);//3 minute interval used for testing
+            //This will do one alarm to go off when updated
+            //alarm.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), sender);
+            //24 hr interval starting at 8:00 AM
+            //alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar1.getTimeInMillis(), AlarmManager.INTERVAL_DAY, sender);
+            alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 90000, sender);//3 minute interval used for testing
 
         }catch(Exception e){
             e.printStackTrace();
         }
     }
 
-    public void cancelAlarm() {
+    public void signOff(){
+        //To end the other alarms going off in the background, need to create an alarm with the same name and cancel it
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+
+        Intent intent3 = new Intent(mContext, goToCheckEmail.class);
+        sender = PendingIntent.getBroadcast(mContext, 0, intent3, 0);
+        alarm = (AlarmManager) mContext.getSystemService(mContext.ALARM_SERVICE);
         alarm.cancel(sender);
     }
 
@@ -133,13 +150,20 @@ public class InitializationActivity extends AsyncTask{
         SharedPreferences emailCheckOptions = mContext.getSharedPreferences(PREFS_NAME1, 0);
         emailOptions = emailCheckOptions.getString("checkOptions", "Both");
         System.out.println(emailOptions);
+        SharedPreferences signoffCheck = mContext.getSharedPreferences(PREFS_NAME2, 0);
+        signoff = signoffCheck.getString("checkSignoff", "False");
+        System.out.println(signoff);
 
         //This jumps to the corresponding method to perform the needed actions
-        if(emailFrequency.equals("Min"))
-            registerAlarmMin(mContext);
-        else if(emailFrequency.equals("Day"))
-            registerAlarmDay(mContext);
-        else if(emailFrequency.equals("Demand"))
-            onDemand();
+        if(signoff.equals("True") && !emailFrequency.equals("OnDemand"))
+            signOff();
+        else {
+            if (emailFrequency.equals("Min"))
+                registerAlarmMin(mContext);
+            else if (emailFrequency.equals("Day"))
+                registerAlarmDay(mContext);
+            else if (emailFrequency.equals("Demand"))
+                onDemand();
+        }
     }
 }

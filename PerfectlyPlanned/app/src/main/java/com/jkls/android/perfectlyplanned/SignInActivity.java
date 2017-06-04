@@ -72,7 +72,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             @Override
             public void onClick(View v) {
                 SmsManager sms = SmsManager.getDefault();
-                sms.sendTextMessage("8507121054", null, "This message was send through Perfectly Planned!", null, null);
+                sms.sendTextMessage("8507121054", null, "This message was sent through Perfectly Planned!", null, null);
             }
         });
 

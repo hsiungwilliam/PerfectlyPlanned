@@ -243,9 +243,9 @@ public class CheckEmail extends AsyncTask{
                     System.out.println("Pulling apart the multipart");
                     for (int k = 0; k < mimeMultipart2.getCount(); k++) {
                         BodyPart bodyPart = mimeMultipart2.getBodyPart(k);
-                        //System.out.println("Bodypart type: " + bodyPart.getContentType());
-                        if(bodyPart.getContentType().contains("text/plain; charset=iso-8859-1")){
-                            //System.out.println("Reading body text");
+                        System.out.println("Bodypart type: " + bodyPart.getContentType());
+                        if(bodyPart.getContentType().contains("ALTERNATIVE")){
+                            System.out.println("Reading body text");
                             System.out.println(bodyPart.getContent().toString());
                         }
                     }

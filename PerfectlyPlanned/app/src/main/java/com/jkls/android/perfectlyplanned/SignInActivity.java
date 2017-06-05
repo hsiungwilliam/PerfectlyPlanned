@@ -128,8 +128,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         pass_word = "sticks27";
 
         //Testing Outlook
-        user_name = "perfectlyplannedtest@outlook.com";
-        pass_word = "Pp123456";
+        //user_name = "perfectlyplannedtest@outlook.com";
+        //pass_word = "Pp123456";
 
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override

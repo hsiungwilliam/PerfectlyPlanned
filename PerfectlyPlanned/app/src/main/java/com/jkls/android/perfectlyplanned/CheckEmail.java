@@ -35,6 +35,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.sun.mail.util.MailSSLSocketFactory;
 
+import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Multipart;
@@ -269,6 +270,25 @@ public class CheckEmail extends AsyncTask{
 
                         //addevent(title, date, loc, from);
                         //Toast.makeText(CheckEmail.this, "Failed Registration: ", Toast.LENGTH_SHORT).show();
+
+                    }//End of reading the subject line
+                    else if(message.getSubject().contains("Making an event for myself")){
+                        System.out.println("Checking body");
+                        //Get message type
+                        //System.out.println("Object Type is :" + message.getContentType());
+                        //System.out.println("Content " + message.get
+                        DataHandler dataHandler = message.getDataHandler();
+                        MimeMultipart mimeMultipart = (MimeMultipart) dataHandler.getContent();
+                        System.out.println("Pulling apart the multipart");
+                        for (int k = 0; k < mimeMultipart.getCount(); k++) {
+                            BodyPart bodyPart = mimeMultipart.getBodyPart(k);
+                            //System.out.println("Bodypart type: " + bodyPart.getContentType());
+                            if(bodyPart.getContentType().contains("TEXT/PLAIN; charset=UTF-8")){
+                                //System.out.println("Reading body text");
+                                System.out.println(bodyPart.getContent().toString());
+                            }
+                        }
+
 
                     }
                 }

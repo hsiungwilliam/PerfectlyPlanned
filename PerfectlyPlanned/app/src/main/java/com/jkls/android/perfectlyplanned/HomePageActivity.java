@@ -30,6 +30,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
     private Button mAccountsButton;
     private Button mExitButton;
     private Button mSignOffButton;
+    private Button mSendTestEmailButton;
 
     private Context mContext;
     String username1;
@@ -57,6 +58,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         mSettingsButton = (Button) findViewById(R.id.button_settings);
         mAccountsButton = (Button) findViewById(R.id.button_accounts);
         mSignOffButton = (Button) findViewById(R.id.button_signoff);
+        mSendTestEmailButton = (Button) findViewById(R.id.button_send_email);
 
         // Click listeners
         mCheckButton.setOnClickListener(this);
@@ -64,6 +66,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         mSettingsButton.setOnClickListener(this);
         mAccountsButton.setOnClickListener(this);
         mSignOffButton.setOnClickListener(this);
+        mSendTestEmailButton.setOnClickListener(this);
     }
 
     //Handles when the settings button is clicked
@@ -128,6 +131,11 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+    // Test sending email
+    public void sendEmail(){
+        //TODO: Add Gmail API
+    }
+
     @Override
     public void onClick(View v) {
         int i = v.getId();
@@ -141,6 +149,9 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
             showAccountsButton();
         } else if (i == R.id.button_signoff) {
             showSignOffButton();
+        } else if (i == R.id.button_send_email) {
+            sendEmail();
         }
+
     }
 }

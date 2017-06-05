@@ -67,4 +67,13 @@
         android:text="SIGN OFF"
         android:textSize="24sp"
         android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/button_send_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="1dp"
+        android:text="Send Test Email"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 </LinearLayout>

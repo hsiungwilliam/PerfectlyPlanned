@@ -159,9 +159,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             editor.putString("checkOptions", "Email");
             editor.commit();
 
-            //Need to go to where this information is stored and change it
             System.out.println("updated to Email only");
-            new InitializationActivity(mContext, username1, password1, currDateTime1, true).execute("");
         } else if (mTextRButton.isChecked() && !emailOptions.equals("Text")) {
             SharedPreferences settings = getSharedPreferences(PREFS_NAME1, 0);
             SharedPreferences.Editor editor = settings.edit();
@@ -169,9 +167,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             editor.putString("checkOptions", "Text");
             editor.commit();
 
-            //Need to go to where this information is stored and change it
             System.out.println("updated to Text only");
-            new InitializationActivity(mContext, username1, password1, currDateTime1, true).execute("");
         } else if (mBothRButton.isChecked() && !emailOptions.equals("Both")) {
             SharedPreferences settings = getSharedPreferences(PREFS_NAME1, 0);
             SharedPreferences.Editor editor = settings.edit();
@@ -179,9 +175,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             editor.putString("checkOptions", "Both");
             editor.commit();
 
-            //Need to go to where this information is stored and change it
             System.out.println("updated to both email and text");
-            new InitializationActivity(mContext, username1, password1, currDateTime1, true).execute("");
         }
 
         //If the settings for ways to check for events have changed then the information needs to be updated
@@ -192,10 +186,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             editor1.putString("checkFrequency", "Min");
             editor1.commit();
 
-            //This will update the settings
             System.out.println("updated to min");
-            new InitializationActivity(mContext, username1, password1, currDateTime1, true).execute("");
-
         } else if (mDayRButton.isChecked() && !emailFrequency.equals("Day")) {
             SharedPreferences settings1 = getSharedPreferences(PREFS_NAME, 0);
             SharedPreferences.Editor editor1 = settings1.edit();
@@ -203,10 +194,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             editor1.putString("checkFrequency", "Day");
             editor1.commit();
 
-            //This will update the settings
             System.out.println("updated to day");
-            new InitializationActivity(mContext, username1, password1, currDateTime1, true).execute("");
-
         } else if (mDemandRButton.isChecked() && !emailFrequency.equals("Demand")) {
             SharedPreferences settings1 = getSharedPreferences(PREFS_NAME, 0);
             SharedPreferences.Editor editor1 = settings1.edit();
@@ -214,10 +202,10 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             editor1.putString("checkFrequency", "Demand");
             editor1.commit();
 
-            //This will update the settings
             System.out.println("updated to on demand");
-            new InitializationActivity(mContext, username1, password1, currDateTime1, true).execute("");
         }
+        //This will update the settings
+        new InitializationActivity(mContext, username1, password1, currDateTime1, true).execute("");
 
         //If there is any new information in either the black or white fields then it gets added here
         if(!mWhiteField.equals("")) {

@@ -33,6 +33,11 @@ import android.content.SharedPreferences;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.sun.mail.util.MailSSLSocketFactory;
 
 import javax.mail.Address;
@@ -64,6 +69,7 @@ public class CheckEmail extends AsyncTask{
     String loc;
     String time;
     Address from;
+    int count;
     int notificationId = 0;
     public static final String PREFS_NAME = "MyTimeFile";
 
@@ -173,7 +179,12 @@ public class CheckEmail extends AsyncTask{
             Date lastdate = format.parse(lastDateTime);
 
             //create properties field
-            Properties properties = new Properties();
+            //Next line was original code
+            //Properties properties = new Properties();
+
+            Properties properties;
+            properties = System.getProperties();
+
             /*properties.setProperty("mail.imap.ssl.enable", "true");
             properties.put("mail.imap.host", host);
             properties.put("mail.imap.port", "995");
@@ -189,10 +200,12 @@ public class CheckEmail extends AsyncTask{
             properties.setProperty("mail.imaps.socketFactory.fallback", "false");
 
             //  properties.put( "mail.pop3.auth", "true" );
-            Session emailSession = Session.getDefaultInstance(properties);
+            Session emailSession = Session.getDefaultInstance(properties, null);
 
             //create the POP3 store object and connect with the pop server
             Store store = emailSession.getStore("imaps");
+
+            System.out.println("right before connect: " + host + " email: " + user + " Password: " + password);
             store.connect(host, user, password);
 
             //create the folder object and open it
@@ -264,12 +277,77 @@ public class CheckEmail extends AsyncTask{
                         NotificationUtils news = new NotificationUtils();
                         news.displayNotification(mContext, count);
                         count++;
-                        //This Toast creates "java.lang.RuntimeException: Can't create handler inside thread that has not called Looper.prepare()"
-                        //Toast.makeText(mContext, "Scanning finished", Toast.LENGTH_SHORT).show();
+                    }
+                    //This else if checks for invitations sent by outlook
+                    else if(message.getSubject().contains("invited")){
+                        String subject = message.getSubject();
+                        from = message.getFrom()[0];
+                        title = "";
+                        loc = "";
+                        date = "";
+                        time = "";
+                        String[] splited = subject.split("\\s+");
+                        int p = 0;
+                        int size = splited.length;
+                        //This is searching for the word invited so it can find the title of the event
+                        while (p<size){
+                            if(splited[p].equals("invited")) {
+                                p=p+3;
+                                title = splited[p];
+                                p++;
+                                while (p<size) {
+                                    title = title + " " + splited[p];
+                                    p++;
+                                }
+                                break;
+                            }
+                            p++;
+                        }
+                        //This is not getting the content of the body!!!!!
+                        String body = message.getContent().toString();
+                        String[] splitBody = body.split("\\s+");
+                        p=0;
+                        size = splitBody.length;
+                        for (int i = 0; i < size; i++) {
+                            System.out.println(splitBody[i] + " ");
+                        }
+                        //This is searching the body of the email for the date, time, and location
+                        while(p<size){
+                            if(splitBody[p].equals("When")){
+                                System.out.println("It found when");
+                                String temp = splitBody[p+1];
+                                p=p+2;
+                                while(!splitBody[p].equals("Where")) {
+                                    temp = temp + " " + splitBody[p];
+                                    p++;
+                                }
+                                loc = splitBody[p+1];
+                                p=p+2;
+                                while(!splitBody[p].equals("Who")) {
+                                    loc = loc + " " + splitBody[p];
+                                    p++;
+                                }
+                                String[] splitTemp = temp.split("\\s+");
+                                date = splitTemp[0];
+                                for(int i = 1; i<4; i++)
+                                    date = date + " " + splitTemp[i];
+                                format = new SimpleDateFormat("MM/dd/yyyy");
+                                Date d = format.parse(date);
+                                date = d.toString();
 
-                        //addevent(title, date, loc, from);
-                        //Toast.makeText(CheckEmail.this, "Failed Registration: ", Toast.LENGTH_SHORT).show();
+                                time = splitTemp[4];
+                                format = new SimpleDateFormat("hh:mm:a");
+                                Date t = format.parse(time);
+                                time = t.toString();
+                                System.out.println("Title: " + title + " location: " + loc + " date: " + date + " time: " + time);
 
+                                NotificationUtils news = new NotificationUtils();
+                                news.displayNotification(mContext, count);
+                                count++;
+                                break;
+                            }
+                            p++;
+                        }
                     }
                 }
             }
@@ -288,41 +366,75 @@ public class CheckEmail extends AsyncTask{
         } catch (NoSuchProviderException e) {
             e.printStackTrace();
             Log.d(TAG, "hey1" );
-            Toast.makeText(mContext, "Email type not currently supported",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Email type not currently supported", Toast.LENGTH_SHORT).show();
         } catch (MessagingException e) {
             e.printStackTrace();
             Log.d(TAG,  "hey2");
-            Toast.makeText(mContext, "Access denied check credentials",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Access denied check credentials", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
             Log.d(TAG, "hey3");
         }
     }
 
-    public  void main(String[] args, String currDateTime) {
-        String host = "imaps.gmail.com";
-        String mailStoreType = "imaps";
-        String username = args[1];
-        String password = args[2];
-        Log.d(TAG, username);
-        Log.d(TAG, password);
+    private String usernameFromEmail(String email) {
+        if (email.contains("@")) {
+            return email.split("@")[0];
+        } else {return email;}
+    }
 
-        /*
-        This was the original code:
-        String host = "imaps.gmail.com";// change accordingly
-        String mailStoreType = "imaps";
-        String username = "jkls2713@gmail.com";// change accordingly
-        String password = "sticks27";// change accordingly
-        */
+    public void getCount(){
+        String username = usernameFromEmail(username1);
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference myRef1 = mRef.child("users/" + username);
 
-        check(host, mailStoreType, username, password);
+        myRef1.child("/count").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                count = Integer.parseInt(dataSnapshot.getValue().toString());
+                System.out.println("count inside of getCount is: " + count);
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
     }
 
     @Override
     protected Object doInBackground(Object[] params) {
-        String host = "";
+        //This will get the values from the database for the username and password
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        String username = usernameFromEmail(username1);
+        DatabaseReference myRef = database.child("users/" + username);
+        getCount();
+
+        myRef.child("/accounts").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                System.out.println("count value: " + count);
+                for(int i = 0; i<count; i++){
+                    String temp = "account" + Integer.toString(i+1);
+                    String temp1 = "accountPW" + Integer.toString(i+1);
+                    String e = dataSnapshot.child(temp).getValue().toString();
+                    String p = dataSnapshot.child(temp1).getValue().toString();
+                    System.out.println("checking email: " + e + " and password: " + p);
+
+                    String host = "";
+                    if(e.contains("gmail"))
+                        host = "imap.gmail.com";
+                    if(e.contains("outlook"))
+                        host = "imap.outlook.com";
+                    if(e.contains("yahoo"))
+                        host = "imap.mail.yahoo.com";
+                    String mailStoreType = "imaps";
+                    System.out.println(host);
+                    check(host, mailStoreType, e, p);
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+
+        /*String host = "";
         if(username1.contains("gmail"))
             host = "imap.gmail.com";// change accordingly
         if(username1.contains("hotmail"))
@@ -331,9 +443,9 @@ public class CheckEmail extends AsyncTask{
             host = "imap.mail.yahoo.com";
 
         String mailStoreType = "imaps";
-        String username = username1;// change accordingly
+        String email = username1;// change accordingly
         String password = password1;// change accordingly
-        check(host, mailStoreType, username, password);
+        check(host, mailStoreType, email, password);*/
 
         return null;
     }

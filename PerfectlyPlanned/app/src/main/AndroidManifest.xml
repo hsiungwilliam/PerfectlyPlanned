@@ -30,6 +30,18 @@
             android:name=".HomePageActivity"
             android:label="@string/app_name">
         </activity>
+        <activity
+            android:name=".UserSignUpActivity"
+            android:label="@string/app_name">
+        </activity>
+        <activity
+            android:name=".UserAccountsActivity"
+            android:label="@string/app_name">
+        </activity>
+        <activity
+            android:name=".AddEmailActivity"
+            android:label="@string/app_name">
+        </activity>
 
         <service
             android:name=".EmailChecker"

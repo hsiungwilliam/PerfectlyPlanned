@@ -122,10 +122,10 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
       //  showProgressDialog();
         String email = mEmailField.getText().toString();
         String password = mPasswordField.getText().toString();
-        //user_name = email;
-        user_name = "jkls2713@gmail.com";
-        //pass_word = password;
-        pass_word = "sticks27";
+        user_name = email;
+        //user_name = "jkls2713@gmail.com";
+        pass_word = password;
+        //pass_word = "sticks27";
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -165,7 +165,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 if (task.isSuccessful()) {
                     //Gets the current date and time to be used for comparison later
                     String currentDateTime = new Date().toString();
-                    onAuthSuccess(task.getResult().getUser(), currentDateTime);
+                    onAuthSuccessSignUp(task.getResult().getUser(), currentDateTime);
                 } else {
                     FirebaseAuthException e = (FirebaseAuthException)task.getException();
                     Toast.makeText(SignInActivity.this, "Failed Registration: "+e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -175,12 +175,11 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         });
     }
 
+    //This is for users already registered, it taked you to the home page
     private void onAuthSuccess(FirebaseUser user, String currDateTime) {
         String username = usernameFromEmail(user.getEmail());
-
         // Write new user
         writeNewUser(user.getUid(), username, user.getEmail());
-
         // Go to MainActivity
         Intent i = new Intent(SignInActivity.this, CheckEmail.class);
         i.putExtra("email", user.getEmail());
@@ -193,8 +192,45 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         in.putExtra("password", pass_word);
         in.putExtra("datetime", currDateTime);
         temp.startActivity(in);
-
         finish();
+    }
+
+    //This is for users that need to sign up
+    private void onAuthSuccessSignUp(FirebaseUser user, String currDateTime) {
+        String username = usernameFromEmail(user.getEmail());
+        // Write new user
+        //writeNewUser(user.getUid(), username, user.getEmail());
+        // Go to MainActivity
+        Intent i = new Intent(SignInActivity.this, CheckEmail.class);
+        i.putExtra("email", user.getEmail());
+
+        Context temp = getBaseContext();
+        Intent in = new Intent(SignInActivity.this, UserSignUpActivity.class);
+        in.putExtra("username", username);
+        in.putExtra("email", user_name);
+        in.putExtra("password", pass_word);
+        in.putExtra("datetime", currDateTime);
+        in.putExtra("count", 0);
+        in.putExtra("userId", user.getUid());
+        temp.startActivity(in);
+        finish();
+    }
+
+    public class User {
+        public String username;
+        public String email;
+        public User() {// Default constructor required for calls to DataSnapshot.getValue(User.class)
+        }
+        public User(String username, String email) {
+            this.username = username;
+            this.email = email;
+        }
+    }
+
+    // [START basic_write]
+    private void writeNewUser(String userId, String name, String email) {
+        User user = new User(name, email);
+        mDatabase.child("users").child(userId).setValue(user.username);
     }
 
     private String usernameFromEmail(String email) {
@@ -221,26 +257,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             mPasswordField.setError(null);
         }
         return result;
-    }
-
-    public class User {
-        public String username;
-        public String email;
-
-        public User() {
-            // Default constructor required for calls to DataSnapshot.getValue(User.class)
-        }
-
-        public User(String username, String email) {
-            this.username = username;
-            this.email = email;
-        }
-    }
-
-    // [START basic_write]
-    private void writeNewUser(String userId, String name, String email) {
-        User user = new User(name, email);
-        mDatabase.child("users").child(userId).setValue(user.username);
     }
 
     public void hideKeyboard(View view) {

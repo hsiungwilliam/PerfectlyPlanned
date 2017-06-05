@@ -87,6 +87,11 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
     //Handles when the accounts button is clicked
     public void showAccountsButton(){
         Log.d(TAG, "accounts");
+        Intent in = new Intent(HomePageActivity.this, UserAccountsActivity.class);
+        in.putExtra("username", username1);
+        in.putExtra("password", password1);
+        in.putExtra("datetime", currDateTime1);
+        mContext.startActivity(in);
         finish();
     }
 
@@ -112,11 +117,9 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
             SharedPreferences settings = mContext.getSharedPreferences(PREFS_NAME, 0);
             SharedPreferences.Editor editor = settings.edit();
             editor.clear().commit();
-            //editor.putString("onExit", "stuff");
             editor.putString("checkSignoff", "True");
             editor.commit();
             new InitializationActivity(mContext, username1, password1, currDateTime1, false).execute("");
-            Thread.sleep(5000);
             editor.clear().commit();
             editor.putString("onExit", "Signoff");
             editor.putString("checkSignoff", "False");
@@ -124,7 +127,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
             finish();
             System.exit(0);
         }catch (Exception e) {
-            Log.d(TAG, "hey3");
+            Log.d(TAG, "Problem signing off");
         }
     }
 

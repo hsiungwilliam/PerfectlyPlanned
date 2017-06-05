@@ -174,7 +174,10 @@ public class CheckEmail extends AsyncTask{
             Date lastdate = format.parse(lastDateTime);
 
             //create properties field
-            Properties properties = new Properties();
+            Properties properties;
+            //new Properties();
+            properties = System.getProperties();
+
             /*properties.setProperty("mail.imap.ssl.enable", "true");
             properties.put("mail.imap.host", host);
             properties.put("mail.imap.port", "995");
@@ -184,17 +187,26 @@ public class CheckEmail extends AsyncTask{
             //Set host address
             //properties.setProperty("mail.imaps.host", imaps.gmail.com);
             //Set specified port
-            properties.setProperty("mail.imaps.port", "993");
+            //properties.setProperty("mail.imaps.port", "993");
             //Using SSL
-            properties.setProperty("mail.imaps.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-            properties.setProperty("mail.imaps.socketFactory.fallback", "false");
+            //properties.setProperty("mail.imaps.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+            //properties.setProperty("mail.imaps.socketFactory.fallback", "false");
 
             //  properties.put( "mail.pop3.auth", "true" );
-            Session emailSession = Session.getDefaultInstance(properties);
+            Session emailSession = Session.getDefaultInstance(properties, null);
 
+
+            System.out.println("getStore()");
             //create the POP3 store object and connect with the pop server
             Store store = emailSession.getStore("imaps");
+
+            System.out.println("Attempting to Connect to Pop server");
+            System.out.println("Host: " + host);
+            System.out.println("User: " + user);
+            System.out.println("Pass: " + password);
             store.connect(host, user, password);
+
+            System.out.println("Connection Successful");
 
             //create the folder object and open it
             Folder emailFolder = store.getFolder("INBOX");
@@ -224,6 +236,19 @@ public class CheckEmail extends AsyncTask{
                     else
                         System.out.println("Subject: " + message.getSubject());
                     System.out.println("From: " + message.getFrom()[0]);
+
+                    //Body
+                    DataHandler dataHandler2 = message.getDataHandler();
+                    MimeMultipart mimeMultipart2 = (MimeMultipart) dataHandler2.getContent();
+                    System.out.println("Pulling apart the multipart");
+                    for (int k = 0; k < mimeMultipart2.getCount(); k++) {
+                        BodyPart bodyPart = mimeMultipart2.getBodyPart(k);
+                        //System.out.println("Bodypart type: " + bodyPart.getContentType());
+                        if(bodyPart.getContentType().contains("text/plain; charset=iso-8859-1")){
+                            //System.out.println("Reading body text");
+                            System.out.println(bodyPart.getContent().toString());
+                        }
+                    }
 
                     if (message.getSubject() == null);
                     else if(message.getSubject().contains("Event")) {
@@ -349,6 +374,12 @@ public class CheckEmail extends AsyncTask{
             host = "imap.mail.outlook.com";
         if(username1.contains("yahoo"))
             host = "imap.mail.yahoo.com";
+        if(username1.contains("outlook")) {
+            System.out.println("Host is outlook");
+            host = "imap.outlook.com";
+        }
+
+        System.out.println("Username is " + username1);
 
         String mailStoreType = "imaps";
         String username = username1;// change accordingly

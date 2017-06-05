@@ -126,6 +126,11 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         user_name = "jkls2713@gmail.com";
         //pass_word = password;
         pass_word = "sticks27";
+
+        //Testing Outlook
+        user_name = "perfectlyplannedtest@outlook.com";
+        pass_word = "Pp123456";
+
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {

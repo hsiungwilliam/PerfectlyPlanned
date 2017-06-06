@@ -44,6 +44,7 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
     public static final String PREFS_NAME1 = "MyCheckOptionsFile";
     public static final String PREFS_NAME2 = "MySignupEmailFile";
     public static final String PREFS_NAME3 = "MySignupPasswordFile";
+    public static final String PREFS_NAME4 = "MyCountFile";
     private DatabaseReference mRef;
     private FirebaseDatabase mDatabase;
     private FirebaseAuth mAuth;
@@ -65,12 +66,11 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
     String email1;
     String password1;
     String currDateTime1;
-    String userId;
     String emailOptions;
     String emailFrequency;
     String freq;
     String opt;
-    private int count;
+    int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +78,6 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         email1 = getIntent().getStringExtra("email");
         password1 = getIntent().getStringExtra("password");
         currDateTime1 = getIntent().getStringExtra("datetime");
-        userId = getIntent().getStringExtra("userId");
         count = getIntent().getIntExtra("count", 0);
         mContext = getBaseContext();
 
@@ -207,24 +206,27 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         //This saves the radio buttons
         update();
         //This section is saving the username and password into shared preferences so they can be saved when the user selects sigh up
-        String temp = mEmailField.toString();
-        String temp1 = mPasswordField.toString();
-        SharedPreferences emails = getSharedPreferences(PREFS_NAME2, count);
+        String temp = mEmailField.getText().toString();
+        String temp1 = mPasswordField.getText().toString();
+        String temp2 = "email" + Integer.toString(count);
+        String temp3 = "password" + Integer.toString(count);
+        SharedPreferences emails = mContext.getSharedPreferences(PREFS_NAME2, 0);
         SharedPreferences.Editor editor = emails.edit();
-        editor.putString("email", temp);
+        editor.putString(temp2, temp);
         editor.commit();
-        SharedPreferences passwords = getSharedPreferences(PREFS_NAME3, count);
+        SharedPreferences passwords = mContext.getSharedPreferences(PREFS_NAME3, 0);
         SharedPreferences.Editor editor1 = passwords.edit();
-        editor1.putString("password", temp1);
+        editor1.putString(temp3, temp1);
         editor1.commit();
         count++;
 
         //This section is just refreshing the user sign up page
         Intent in = new Intent(UserSignUpActivity.this, UserSignUpActivity.class);
-        in.putExtra("username", email1);
+        in.putExtra("username", username1);
+        in.putExtra("email", email1);
         in.putExtra("password", password1);
         in.putExtra("datetime", currDateTime1);
-        in.putExtra("count", count+1);
+        in.putExtra("count", count);
         mContext.startActivity(in);
         finish();
     }
@@ -244,6 +246,7 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         //
         //This will remove the username and userId from the database since it will not be used
         //
+
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
         Query userQuery = ref.child("users").equalTo(username1);
         userQuery.getRef().removeValue();
@@ -265,14 +268,15 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         //This is gathering the information collected from the email and password text boxes and saving it
         String temp = mEmailField.getText().toString();
         String temp1 = mPasswordField.getText().toString();
+        String temp2 = "email" + Integer.toString(count);
+        String temp3 = "password" + Integer.toString(count);
         SharedPreferences emails = mContext.getSharedPreferences(PREFS_NAME2, 0);
         SharedPreferences.Editor editor = emails.edit();
-
-        editor.putString("email", temp);
+        editor.putString(temp2, temp);
         editor.commit();
         SharedPreferences passwords = mContext.getSharedPreferences(PREFS_NAME3, 0);
         SharedPreferences.Editor editor1 = passwords.edit();
-        editor1.putString("password", temp1);
+        editor1.putString(temp3, temp1);
         editor1.commit();
         count++;
         //This saves the information collected from the radio buttons
@@ -287,8 +291,6 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         SharedPreferences passwords1 = mContext.getSharedPreferences(PREFS_NAME3, 0);
         SharedPreferences.Editor editor3 = passwords1.edit();
         editor3.clear().commit();
-
-        System.out.println("Email: " + temp + "Password: " + temp1 + "Count: " + count);
 
         Intent in = new Intent(UserSignUpActivity.this, HomePageActivity.class);
         in.putExtra("username", email1);
@@ -388,16 +390,26 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         childUpdates.put("users/" + username1, postValues);
         mRef.updateChildren(childUpdates);
 
+        String value = Integer.toString(count);
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME4, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.clear().commit();
+        editor.putString("count", value);
+        editor.commit();
+
         addEmailsToDB();
     }
 
     private void addEmailsToDB(){
-        PostAccount post = new PostAccount(count);
-        Map<String, Object> postValues = post.toMap();
+        for(int i = 0; i<count; i++) {
+            String str = "/account" + Integer.toString(i);
+            PostAccount post = new PostAccount(i);
+            Map<String, Object> postValues = post.toMap();
 
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("users/" + username1 + "/accounts", postValues);
-        mRef.updateChildren(childUpdates);
+            Map<String, Object> childUpdates = new HashMap<>();
+            childUpdates.put("users/" + username1 + "/accounts" + str, postValues);
+            mRef.updateChildren(childUpdates);
+        }
     }
 
     @IgnoreExtraProperties
@@ -408,8 +420,6 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         public String freq;
         public String opt;
         public int count;
-        public static final String PREFS_NAME2 = "MySignupEmailFile";
-        public static final String PREFS_NAME3 = "MySignupPasswordFile";
 
         public Post() {// Default constructor required for calls to DataSnapshot.getValue(Post.class)
         }
@@ -437,30 +447,31 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
 
     @IgnoreExtraProperties
     public class PostAccount {
-        public int count;
+        int num;
         public static final String PREFS_NAME2 = "MySignupEmailFile";
         public static final String PREFS_NAME3 = "MySignupPasswordFile";
 
         public PostAccount() {// Default constructor required for calls to DataSnapshot.getValue(Post.class)
         }
-        public PostAccount(int count) {
-            this.count = count;
+        public PostAccount(int num) {
+            this.num = num;
         }
         @Exclude
         public Map<String, Object> toMap() {
-            System.out.println("inside map part 2");
+            System.out.println("inside map part 2, i = " + num);
             HashMap<String, Object> result = new HashMap<>();
-            for(int i = 0; i<count; i++){
-                SharedPreferences checkUsername = getSharedPreferences(PREFS_NAME2, i);
-                String getUsername = checkUsername.getString("email", "empty@gmail.com");
-                SharedPreferences checkPassword = getSharedPreferences(PREFS_NAME3, i);
-                String getPassword = checkPassword.getString("password", "1234");
-                String str = "account" + Integer.toString(i+1);
-                String str1 = "accountPW" + Integer.toString(i+1);
 
-                result.put(str, getUsername);
-                result.put(str1, getPassword);
-            }
+            String temp2 = "email" + Integer.toString(num);
+            String temp3 = "password" + Integer.toString(num);
+
+            SharedPreferences checkUsername = getSharedPreferences(PREFS_NAME2, 0);
+            String getUsername = checkUsername.getString(temp2, "empty@gmail.com");
+            SharedPreferences checkPassword = getSharedPreferences(PREFS_NAME3, 0);
+            String getPassword = checkPassword.getString(temp3, "1234");
+            System.out.println("adding email: " + getUsername + " and password: " + getPassword + " to database");
+
+            result.put("email", getUsername);
+            result.put("password", getPassword);
             return result;
         }
     }

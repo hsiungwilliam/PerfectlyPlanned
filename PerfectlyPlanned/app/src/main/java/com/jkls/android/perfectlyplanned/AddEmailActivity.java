@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class AddEmailActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "AddEmailActivity";
-    public static final String PREFS_NAME = "MyCountFile";
+    public static final String PREFS_NAME4 = "MyCountFile";
     private DatabaseReference mRef;
     private FirebaseDatabase mDatabase;
     private FirebaseAuth mAuth;
@@ -44,7 +44,6 @@ public class AddEmailActivity extends AppCompatActivity implements View.OnClickL
 
     private Context mContext;
     String username1;
-    String email1;
     String password1;
     String currDateTime1;
     int count;
@@ -52,8 +51,8 @@ public class AddEmailActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         username1 = getIntent().getStringExtra("username");
-        email1 = getIntent().getStringExtra("email");
         password1 = getIntent().getStringExtra("password");
+        currDateTime1 = getIntent().getStringExtra("datetime");
         mContext = getBaseContext();
 
         super.onCreate(savedInstanceState);
@@ -132,21 +131,24 @@ public class AddEmailActivity extends AppCompatActivity implements View.OnClickL
         if (!validateForm()) {
             return;
         }
+
         String email = mEmailField.getText().toString();
         String password = mPasswordField.getText().toString();
+        String username = usernameFromEmail(username1);
 
         //This part is adding the new account into the database
+        String str = "/account" + Integer.toString(count);
         PostAccount post = new PostAccount(email, password);
         Map<String, Object> postValues = post.toMap();
 
         Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("users/" + username1 + "/accounts", postValues);
+        childUpdates.put("users/" + username + "/accounts" + str, postValues);
         mRef.updateChildren(childUpdates);
 
         //this part is updating the count value in the database
         updateCount();
 
-        System.out.println("Email: " + email + " Password: " + password + " Count: " + count + "inside add email activity");
+        System.out.println("Email: " + email + " Password: " + password + " Count: " + count + " inside add email activity");
 
         Intent in = new Intent(AddEmailActivity.this, UserAccountsActivity.class);
         in.putExtra("username", username1);
@@ -168,13 +170,9 @@ public class AddEmailActivity extends AppCompatActivity implements View.OnClickL
         }
         @Exclude
         public Map<String, Object> toMap() {
-            String username = usernameFromEmail(username1);
             HashMap<String, Object> result = new HashMap<>();
-            int num = count+1;
-            String str = "account" + Integer.toString(num);
-            String str1 = "accountPW" + Integer.toString(num);
-            result.put(str, email);
-            result.put(str1, password);
+            result.put("email", email);
+            result.put("password", password);
             return result;
         }
     }
@@ -191,6 +189,13 @@ public class AddEmailActivity extends AppCompatActivity implements View.OnClickL
         DatabaseReference myRef = database.child("users/" + username);
         count++;
         myRef.child("count").setValue(count);
+
+        String value = Integer.toString(count);
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME4, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.clear().commit();
+        editor.putString("count", value);
+        editor.commit();
     }
 
     boolean isEmailValid(CharSequence email) {

@@ -16,6 +16,12 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,6 +37,7 @@ public class CheckText extends AsyncTask {
     String username1;
     String password1;
     String currDateTime1;
+    String currDateTime2;
     private Context mContext;
     public String ACTION_1;
     String title;
@@ -75,14 +82,17 @@ public class CheckText extends AsyncTask {
         System.out.println("we made it");
     }
 
+    public void getDateTime(){
+        SharedPreferences getTime = mContext.getSharedPreferences(PREFS_NAME, 0);
+        currDateTime2 = getTime.getString("time", "Sun Jan 01 08:00:00 EDT 2017");
+    }
+
     public void check() {
         SimpleDateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss z yyyy");
         try{
             //Retrieving the last date and time the app was run
-            SharedPreferences lastDate = mContext.getSharedPreferences(PREFS_NAME, 0);
-            //The second value for getString is just a random default value
-            String lastDateTime = lastDate.getString("currdatetime", "Mon May 01 08:00:00 EDT 2010");
-            Date lastdate = format.parse(lastDateTime);
+            getDateTime();
+            Date lastdate = format.parse(currDateTime2);
 
             //This is creating a list of all the texts and their information
             ContentResolver contentResolver = mContext.getContentResolver();
@@ -152,14 +162,6 @@ public class CheckText extends AsyncTask {
                     c.moveToNext();
                 }
             }
-
-            //Saving the current time for next comparison because we have reached an email that has already been checked
-            /*SharedPreferences settings = mContext.getSharedPreferences(PREFS_NAME, 0);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.clear().commit();
-            editor.putString("currdatetime", currDateTime1);
-            editor.commit();*/
-
             c.close();
         }catch (Exception e) {
             e.printStackTrace();

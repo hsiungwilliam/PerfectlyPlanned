@@ -11,8 +11,13 @@ import android.view.WindowManager;
 import android.widget.Button;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Date;
 
 /**
  * Created by eande on 5/26/2017.
@@ -22,6 +27,11 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
 
     private static final String TAG = "HomePageActivity";
     public static final String PREFS_NAME = "MyExitFile";
+    public static final String PREFS_NAME2 = "MyCountFile";
+    public static final String PREFS_NAME1 = "MyCheckOptionsFile";
+    public static final String PREFS_NAME3 = "MyEmailFrequencyFile";
+    public static final String PREFS_NAME4 = "MyTimeFile";
+
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
 
@@ -35,6 +45,8 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
     String username1;
     String password1;
     String currDateTime1;
+    String emailOptions;
+    int count;
 
     public void HomePageActivity(){
     }
@@ -78,10 +90,71 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         finish();
     }
 
+    private String usernameFromEmail(String email) {
+        if (email.contains("@")) {
+            return email.split("@")[0];
+        } else {return email;}
+    }
+
+    public void getCount(){
+        SharedPreferences emailCount = getSharedPreferences(PREFS_NAME2, 0);
+        String value = emailCount.getString("count", "0");
+        count = Integer.parseInt(value);
+    }
+
+    public void getEmailOptions(){
+        SharedPreferences emailCheckOptions = getSharedPreferences(PREFS_NAME1, 0);
+        emailOptions = emailCheckOptions.getString("checkOptions", "Both");
+    }
+
+    public void updateCurrentDateTime(){
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        String username = usernameFromEmail(username1);
+        String currentDateTime = new Date().toString();
+        DatabaseReference myRef = database.child("users/" + username);
+        myRef.child("currentDateTime").setValue(currentDateTime);
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME4, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.clear().commit();
+        editor.putString("time", currentDateTime);
+        editor.commit();
+    }
+
     //Handles when the check button is clicked
     public void showCheckButton(){
         Log.d(TAG, "check");
-        new CheckEmail(mContext, username1, password1, currDateTime1).execute("");
+        getCount();
+        getEmailOptions();
+        String username = usernameFromEmail(username1);
+        System.out.println("inside of check button, count: " + count + " email options: " + emailOptions);
+
+        if (emailOptions.equals("Text"))
+            new CheckText(mContext, username1, password1, currDateTime1).execute("");
+        else if(emailOptions.equals("Email") || emailOptions.equals("Both")) {
+            //This will get the values from the database for the username and password
+            DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+            DatabaseReference myRef = database.child("users/" + username);
+            myRef.child("/accounts").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    System.out.println("count value: " + count);
+                    for (int i = 0; i < count; i++) {
+                        String temp = "/account" + Integer.toString(i);
+                        String e = dataSnapshot.child(temp + "/email").getValue().toString();
+                        String p = dataSnapshot.child(temp + "/password").getValue().toString();
+                        System.out.println("checking email: " + e + " and password: " + p);
+                        new CheckEmail(mContext, e, p, currDateTime1).execute("");
+                    }
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                }
+            });
+            if(emailOptions.equals("Both"))
+                new CheckText(mContext, username1, password1, currDateTime1).execute("");
+        }
+        //updateCurrentDateTime();
     }
 
     //Handles when the accounts button is clicked
@@ -124,6 +197,17 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
             editor.putString("onExit", "Signoff");
             editor.putString("checkSignoff", "False");
             editor.commit();
+
+            //This is to clear all the saved values
+            SharedPreferences clearCheckOptions = mContext.getSharedPreferences(PREFS_NAME1, 0);
+            SharedPreferences.Editor editor1 = clearCheckOptions.edit();
+            editor1.clear().commit();
+            SharedPreferences clearCount = mContext.getSharedPreferences(PREFS_NAME2, 0);
+            SharedPreferences.Editor editor2 = clearCount.edit();
+            editor2.clear().commit();
+            SharedPreferences clearFrequency = mContext.getSharedPreferences(PREFS_NAME3, 0);
+            SharedPreferences.Editor editor3 = clearFrequency.edit();
+            editor3.clear().commit();
             finish();
             System.exit(0);
         }catch (Exception e) {

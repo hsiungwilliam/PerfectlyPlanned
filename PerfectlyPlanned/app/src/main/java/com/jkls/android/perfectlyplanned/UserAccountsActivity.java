@@ -116,11 +116,10 @@ public class UserAccountsActivity extends AppCompatActivity implements View.OnCl
         myRef.child("/accounts").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                System.out.println("count value: " + count);
                 for(int i = 0; i<count; i++){
-                    String temp = "account" + Integer.toString(i+1);
+                    String temp = "account" + Integer.toString(i);
                     System.out.println(temp);
-                    String e = dataSnapshot.child(temp).getValue().toString();
+                    String e = dataSnapshot.child(temp + "/email").getValue().toString();
                     System.out.println(e);
                     addToList(e);
                 }
@@ -186,20 +185,15 @@ public class UserAccountsActivity extends AppCompatActivity implements View.OnCl
         adapter.notifyDataSetChanged();
 
         //This is deleting that item from the database
+        String str = "/account" + Integer.toString(count-1);
         String username = usernameFromEmail(username1);
-        DatabaseReference myRef = mRef.child("users/" + username);
-        myRef.child("/accounts").addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference myRef = mRef.child("users/" + username + "/accounts");
+        myRef.child(str).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(int i = 0; i<=0; i++) {
-                    String temp = "account" + Integer.toString(i + 1);
-                    String e = dataSnapshot.child(temp).getValue().toString();
-                    if(e.equals(emailstr)){
-                        dataSnapshot.child(temp).getRef().removeValue();
-                        String temp1 = "accountPW" + Integer.toString(i + 1);
-                        dataSnapshot.child(temp1).getRef().removeValue();
-                    }
-                }
+                dataSnapshot.child("email").getRef().removeValue();
+                dataSnapshot.child("password").getRef().removeValue();
+                dataSnapshot.getRef().removeValue();
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {}

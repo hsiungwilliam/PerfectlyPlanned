@@ -177,9 +177,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
     //This is for users already registered, it taked you to the home page
     private void onAuthSuccess(FirebaseUser user, String currDateTime) {
-        String username = usernameFromEmail(user.getEmail());
-        // Write new user
-        writeNewUser(user.getUid(), username, user.getEmail());
         // Go to MainActivity
         Intent i = new Intent(SignInActivity.this, CheckEmail.class);
         i.putExtra("email", user.getEmail());
@@ -187,6 +184,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         new InitializationActivity(getBaseContext(), user_name, pass_word, currDateTime, false).execute("");
 
         Context temp = getBaseContext();
+        System.out.println(currDateTime);
         Intent in = new Intent(SignInActivity.this, HomePageActivity.class);
         in.putExtra("username", user_name);
         in.putExtra("password", pass_word);
@@ -198,20 +196,17 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     //This is for users that need to sign up
     private void onAuthSuccessSignUp(FirebaseUser user, String currDateTime) {
         String username = usernameFromEmail(user.getEmail());
-        // Write new user
-        //writeNewUser(user.getUid(), username, user.getEmail());
         // Go to MainActivity
         Intent i = new Intent(SignInActivity.this, CheckEmail.class);
         i.putExtra("email", user.getEmail());
 
         Context temp = getBaseContext();
-        Intent in = new Intent(SignInActivity.this, UserSignUpActivity.class);
+        Intent in = new Intent(SignInActivity.this, SignUpActivity.class);
         in.putExtra("username", username);
         in.putExtra("email", user_name);
         in.putExtra("password", pass_word);
         in.putExtra("datetime", currDateTime);
         in.putExtra("count", 0);
-        in.putExtra("userId", user.getUid());
         temp.startActivity(in);
         finish();
     }

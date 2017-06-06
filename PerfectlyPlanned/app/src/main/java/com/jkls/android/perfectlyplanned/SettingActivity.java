@@ -25,6 +25,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 
+import java.util.Date;
+
 import static android.content.ContentValues.TAG;
 
 /**
@@ -158,6 +160,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             editor.clear().commit();
             editor.putString("checkOptions", "Email");
             editor.commit();
+            updateFreq("Email");
 
             System.out.println("updated to Email only");
         } else if (mTextRButton.isChecked() && !emailOptions.equals("Text")) {
@@ -166,6 +169,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             editor.clear().commit();
             editor.putString("checkOptions", "Text");
             editor.commit();
+            updateFreq("Text");
 
             System.out.println("updated to Text only");
         } else if (mBothRButton.isChecked() && !emailOptions.equals("Both")) {
@@ -174,6 +178,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             editor.clear().commit();
             editor.putString("checkOptions", "Both");
             editor.commit();
+            updateFreq("Both");
 
             System.out.println("updated to both email and text");
         }
@@ -185,6 +190,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             editor1.clear().commit();
             editor1.putString("checkFrequency", "Min");
             editor1.commit();
+            updateOpt("Min");
 
             System.out.println("updated to min");
         } else if (mDayRButton.isChecked() && !emailFrequency.equals("Day")) {
@@ -193,6 +199,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             editor1.clear().commit();
             editor1.putString("checkFrequency", "Day");
             editor1.commit();
+            updateOpt("Day");
 
             System.out.println("updated to day");
         } else if (mDemandRButton.isChecked() && !emailFrequency.equals("Demand")) {
@@ -201,6 +208,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             editor1.clear().commit();
             editor1.putString("checkFrequency", "Demand");
             editor1.commit();
+            updateOpt("Demand");
 
             System.out.println("updated to on demand");
         }
@@ -279,6 +287,28 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         mMinRButton.setChecked(false);
         mDayRButton.setChecked(false);
         mDemandRButton.setChecked(true);
+    }
+
+    private String usernameFromEmail(String email) {
+        if (email.contains("@")) {
+            return email.split("@")[0];
+        } else {return email;}
+    }
+
+    public void updateFreq(String value){
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        String username = usernameFromEmail(username1);
+        String currentDateTime = new Date().toString();
+        DatabaseReference myRef = database.child("users/" + username);
+        myRef.child("freq").setValue(value);
+    }
+
+    public void updateOpt(String value){
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        String username = usernameFromEmail(username1);
+        String currentDateTime = new Date().toString();
+        DatabaseReference myRef = database.child("users/" + username);
+        myRef.child("opt").setValue(value);
     }
 
     @Override

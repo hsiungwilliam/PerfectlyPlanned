@@ -1,9 +1,5 @@
 package com.jkls.android.perfectlyplanned;
 
-import android.app.Activity;
-import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -11,11 +7,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,8 +22,6 @@ import android.util.Log;
 import android.widget.Toast;
 import android.content.SharedPreferences;
 
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -41,9 +30,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.sun.mail.util.MailSSLSocketFactory;
 
 import javax.mail.Address;
-import javax.mail.BodyPart;
-import javax.mail.Multipart;
-import javax.mail.internet.*;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -62,6 +48,7 @@ public class CheckEmail extends AsyncTask{
     String username1;
     String password1;
     String currDateTime1;
+    String currDateTime2;
     Intent intent;
     private Context mContext;
     String title;
@@ -167,16 +154,18 @@ public class CheckEmail extends AsyncTask{
 
     }
 
+    public void getDateTime(){
+        SharedPreferences getTime = mContext.getSharedPreferences(PREFS_NAME, 0);
+        currDateTime2 = getTime.getString("time", "Sun Jan 01 08:00:00 EDT 2017");
+    }
 
     public  void check(String host, String storeType, String user, String password) {
         SimpleDateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss z yyyy");
 
         try {
             //Retrieving the last date and time the app was run
-            SharedPreferences lastDate = mContext.getSharedPreferences(PREFS_NAME, 0);
-            //The second value for getString is just a random default value
-            String lastDateTime = lastDate.getString("currdatetime", "Mon May 01 08:00:00 EDT 2010");
-            Date lastdate = format.parse(lastDateTime);
+            getDateTime();
+            Date lastdate = format.parse(currDateTime2);
 
             //create properties field
             //Next line was original code
@@ -352,13 +341,6 @@ public class CheckEmail extends AsyncTask{
                 }
             }
 
-            //Saving the current time for next comparison because we have reached an email that has already been checked
-            /*SharedPreferences settings = mContext.getSharedPreferences(PREFS_NAME, 0);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.clear().commit();
-            editor.putString("currdatetime", currDateTime1);
-            editor.commit();*/
-
             //close the store and folder objects
             emailFolder.close(false);
             store.close();
@@ -377,75 +359,20 @@ public class CheckEmail extends AsyncTask{
         }
     }
 
-    private String usernameFromEmail(String email) {
-        if (email.contains("@")) {
-            return email.split("@")[0];
-        } else {return email;}
-    }
-
-    public void getCount(){
-        String username = usernameFromEmail(username1);
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference myRef1 = mRef.child("users/" + username);
-
-        myRef1.child("/count").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                count = Integer.parseInt(dataSnapshot.getValue().toString());
-                System.out.println("count inside of getCount is: " + count);
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-    }
-
     @Override
     protected Object doInBackground(Object[] params) {
-        //This will get the values from the database for the username and password
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        String username = usernameFromEmail(username1);
-        DatabaseReference myRef = database.child("users/" + username);
-        getCount();
-
-        myRef.child("/accounts").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                System.out.println("count value: " + count);
-                for(int i = 0; i<count; i++){
-                    String temp = "account" + Integer.toString(i+1);
-                    String temp1 = "accountPW" + Integer.toString(i+1);
-                    String e = dataSnapshot.child(temp).getValue().toString();
-                    String p = dataSnapshot.child(temp1).getValue().toString();
-                    System.out.println("checking email: " + e + " and password: " + p);
-
-                    String host = "";
-                    if(e.contains("gmail"))
-                        host = "imap.gmail.com";
-                    if(e.contains("outlook"))
-                        host = "imap.outlook.com";
-                    if(e.contains("yahoo"))
-                        host = "imap.mail.yahoo.com";
-                    String mailStoreType = "imaps";
-                    System.out.println(host);
-                    check(host, mailStoreType, e, p);
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-
-        /*String host = "";
+        String host = "";
         if(username1.contains("gmail"))
             host = "imap.gmail.com";// change accordingly
         if(username1.contains("hotmail"))
-            host = "imap.mail.outlook.com";
+            host = "imap.outlook.com";
         if(username1.contains("yahoo"))
-            host = "imap.mail.yahoo.com";
+            host = "imap.yahoo.com";
 
         String mailStoreType = "imaps";
         String email = username1;// change accordingly
         String password = password1;// change accordingly
-        check(host, mailStoreType, email, password);*/
+        check(host, mailStoreType, email, password);
 
         return null;
     }

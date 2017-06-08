@@ -1,33 +1,31 @@
 package com.jkls.android.perfectlyplanned;
 
-import android.app.Activity;
+import android.Manifest;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.mail.Address;
 
 /**
  * Created by eande on 5/29/2017.
@@ -49,6 +47,7 @@ public class CheckText extends AsyncTask {
     private static final String TAG = "CheckText";
 
     public CheckText(Context context, String user_name, String pass_word, String currDateTime){
+        System.out.println("inside of check texts");
         mContext = context;
         username1 = user_name;
         password1 = pass_word;
@@ -90,6 +89,7 @@ public class CheckText extends AsyncTask {
     public void check() {
         SimpleDateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss z yyyy");
         try{
+            System.out.println("inside of checking text");
             //Retrieving the last date and time the app was run
             getDateTime();
             Date lastdate = format.parse(currDateTime2);
@@ -187,6 +187,7 @@ public class CheckText extends AsyncTask {
 
     @Override
     protected Object doInBackground(Object[] params) {
+        System.out.println("inside check texts background");
         check();
         return null;
     }

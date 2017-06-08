@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -126,7 +128,7 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
 
         //This is just the initializing of the shared preferences for both the email options and the check frequency
         SharedPreferences emailCheckFrequency = getSharedPreferences(PREFS_NAME, 0);
-        emailFrequency = emailCheckFrequency.getString("checkFrequency", "OnDemand");
+        emailFrequency = emailCheckFrequency.getString("checkFrequency", "Demand");
         SharedPreferences emailCheckOptions = getSharedPreferences(PREFS_NAME1, 0);
         emailOptions = emailCheckOptions.getString("checkOptions", "Both");
 
@@ -292,6 +294,8 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         SharedPreferences.Editor editor3 = passwords1.edit();
         editor3.clear().commit();
 
+        new InitializationActivity(mContext, email1, password1, currDateTime1, false).execute("");
+
         Intent in = new Intent(UserSignUpActivity.this, HomePageActivity.class);
         in.putExtra("username", email1);
         in.putExtra("password", password1);
@@ -441,6 +445,7 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
             result.put("freq", freq);
             result.put("opt", opt);
             result.put("count", count);
+            result.put("accessVar", true);
             return result;
         }
     }

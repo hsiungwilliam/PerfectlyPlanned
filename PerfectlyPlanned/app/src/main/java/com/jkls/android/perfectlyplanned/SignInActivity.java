@@ -182,9 +182,9 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         i.putExtra("email", user.getEmail());
 
         new InitializationActivity(getBaseContext(), user_name, pass_word, currDateTime, false).execute("");
+        //Toast.makeText(SignInActivity.this, "Checking Completed", Toast.LENGTH_SHORT).show();
 
         Context temp = getBaseContext();
-        System.out.println(currDateTime);
         Intent in = new Intent(SignInActivity.this, HomePageActivity.class);
         in.putExtra("username", user_name);
         in.putExtra("password", pass_word);
@@ -220,12 +220,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             this.username = username;
             this.email = email;
         }
-    }
-
-    // [START basic_write]
-    private void writeNewUser(String userId, String name, String email) {
-        User user = new User(name, email);
-        mDatabase.child("users").child(userId).setValue(user.username);
     }
 
     private String usernameFromEmail(String email) {

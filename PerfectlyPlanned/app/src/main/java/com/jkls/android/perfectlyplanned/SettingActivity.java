@@ -116,7 +116,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
 
         //This is just the initializing of the shared preferences for both the email options and the check frequency
         SharedPreferences emailCheckFrequency = getSharedPreferences(PREFS_NAME, 0);
-        emailFrequency = emailCheckFrequency.getString("checkFrequency", "OnDemand");
+        emailFrequency = emailCheckFrequency.getString("checkFrequency", "Demand");
         SharedPreferences emailCheckOptions = getSharedPreferences(PREFS_NAME1, 0);
         emailOptions = emailCheckOptions.getString("checkOptions", "Both");
 

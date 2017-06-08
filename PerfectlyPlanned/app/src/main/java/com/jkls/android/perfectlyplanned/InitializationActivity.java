@@ -8,15 +8,23 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by eande on 5/25/2017.
@@ -24,9 +32,7 @@ import java.util.Date;
 
 public class InitializationActivity extends AsyncTask{
     private static final String TAG = "InitializationActivity";
-    String username1;
-    String password1;
-    String currDateTime1;
+    private DatabaseReference mRef;
     String signoff;
     static String userName;
     static String username2;
@@ -35,6 +41,7 @@ public class InitializationActivity extends AsyncTask{
     String emailOptions;
     String emailFrequency;
     Boolean settingsChange1;
+    Boolean accessVar;
     static int count;
     AlarmManager alarm = null;
     PendingIntent sender;
@@ -47,19 +54,18 @@ public class InitializationActivity extends AsyncTask{
 
     public InitializationActivity(Context context, String user_name, String pass_word, String currDateTime, Boolean settingsChange){
         mContext = context;
-        username1 = user_name;
         username2 = user_name;
-        password1 = pass_word;
         password2 = pass_word;
-        currDateTime1 = currDateTime;
         currDateTime2 = currDateTime;
         settingsChange1 = settingsChange;
+        mRef = FirebaseDatabase.getInstance().getReference();
     }
 
     @Override
     protected Object doInBackground(Object[] params) {
         System.out.println("made it into the background");
-        main();
+        //This will get the initial values stored in the app/database
+        getDBInfo();
         return null;
     }
 
@@ -91,28 +97,6 @@ public class InitializationActivity extends AsyncTask{
         }
     }
 
-    public void getCount(){
-        String username = usernameFromEmail(username1);
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference myRef1 = mRef.child("users/" + username);
-
-        myRef1.child("/count").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                count = Integer.parseInt(dataSnapshot.getValue().toString());
-                System.out.println("count inside of getCount is: " + count);
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-
-        String value = Integer.toString(count);
-        SharedPreferences saveCount = mContext.getSharedPreferences(PREFS_NAME3, 0);
-        SharedPreferences.Editor editor = saveCount.edit();
-        editor.putString("count", value);
-        editor.commit();
-    }
-
     private String usernameFromEmail(String email) {
         if (email.contains("@")) {
             return email.split("@")[0];
@@ -126,13 +110,14 @@ public class InitializationActivity extends AsyncTask{
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "StartEmailCheck");
 
-            String emailOptions = intent.getExtras().getString("emailOptions");
+            final String emailOptions = intent.getExtras().getString("emailOptions");
             if (emailOptions.equals("Text"))
                 new CheckText(context, username2, password2, currDateTime2).execute("");
             else if(emailOptions.equals("Email") || emailOptions.equals("Both")) {
                 //This will get the values from the database for the username and password
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference();
                 DatabaseReference myRef = database.child("users/" + userName);
+
                 myRef.child("/accounts").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -144,13 +129,14 @@ public class InitializationActivity extends AsyncTask{
                             System.out.println("checking email: " + e + " and password: " + p);
                             new CheckEmail(mContext, e, p, currDateTime2).execute("");
                         }
+                        if(emailOptions.equals("Both"))
+                            new CheckText(mContext, username2, password2, currDateTime2).execute("");
+                        Toast.makeText(mContext, "Checking Completed", Toast.LENGTH_SHORT).show();
                     }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                     }
                 });
-                if(emailOptions.equals("Both"))
-                    new CheckText(context, username2, password2, currDateTime2).execute("");
             }
             //updateCurrentDateTime();
         }
@@ -207,58 +193,102 @@ public class InitializationActivity extends AsyncTask{
         alarm.cancel(sender);
     }
 
-    public void getEmailOptions(){
-        String username = usernameFromEmail(username1);
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference();
+    public void getDBInfo(){
+        System.out.println("inside get DB info");
+        String username = usernameFromEmail(username2);
         DatabaseReference myRef1 = mRef.child("users/" + username);
 
-        myRef1.child("/opt").addListenerForSingleValueEvent(new ValueEventListener() {
+        /*myRef1.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                emailOptions = dataSnapshot.getValue().toString();
+                System.out.println("inside the add listener");
+                emailFrequency = dataSnapshot.child("/freq").getValue().toString();
+                emailOptions = dataSnapshot.child("/opt").getValue().toString();
+                count = Integer.parseInt(dataSnapshot.child("/email").getValue().toString());
+                currDateTime2 = dataSnapshot.child("/currentDateTime").getValue().toString();
+                accessVar = Boolean.parseBoolean(dataSnapshot.child("/accessVar").getValue().toString());
+                System.out.println(emailFrequency + " " + emailOptions + " " + count + " " + currDateTime2 + " " + accessVar);
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {}
-        });
+        });*/
 
-        SharedPreferences saveOptions = mContext.getSharedPreferences(PREFS_NAME1, 0);
-        SharedPreferences.Editor editor = saveOptions.edit();
-        editor.putString("checkOptions", emailOptions);
-        editor.commit();
+
+        Query topPostsQuery = myRef1;
+        final DatabaseReference allUsersRef = myRef1;
+
+        topPostsQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            public void onDataChange(final DataSnapshot topPostsSnapshot) {
+                allUsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    public void onDataChange(DataSnapshot allUsersSnapshot) {
+                        System.out.println("inside the add listener");
+                        emailFrequency = allUsersSnapshot.child("/freq").getValue().toString();
+                        emailOptions = allUsersSnapshot.child("/opt").getValue().toString();
+                        count = Integer.parseInt(allUsersSnapshot.child("/count").getValue().toString());
+                        currDateTime2 = allUsersSnapshot.child("/currentDateTime").getValue().toString();
+                        accessVar = Boolean.parseBoolean(allUsersSnapshot.child("/accessVar").getValue().toString());
+                        System.out.println(emailFrequency + " " + emailOptions + " " + count + " " + currDateTime2 + " " + accessVar);
+                        main();
+                    }
+                    public void onCancelled(DatabaseError databaseError) {
+                        System.out.println("There was an error: 1");
+                    }
+                });
+            }
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("There was an error: 2");
+            }
+        });
     }
 
-    public void getEmailFrequency(){
-        String username = usernameFromEmail(username1);
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference myRef1 = mRef.child("users/" + username);
+    public void updateAccessVariable(){
+        System.out.println("inside update access variable");
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        String username = usernameFromEmail(username2);
+        DatabaseReference myRef = database.child("users/" + username);
+        myRef.child("/accessVar").setValue(true);
+    }
 
-        myRef1.child("/freq").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                emailFrequency = dataSnapshot.getValue().toString();
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-
+    public void updateGlobalVar(){
+        //this will update the email frequency
         SharedPreferences saveFrequency = mContext.getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = saveFrequency.edit();
         editor.putString("checkFrequency", emailFrequency);
         editor.commit();
+
+        //this will update the email options
+        SharedPreferences saveOptions = mContext.getSharedPreferences(PREFS_NAME1, 0);
+        SharedPreferences.Editor editor1 = saveOptions.edit();
+        editor1.putString("checkOptions", emailOptions);
+        editor1.commit();
+
+        //this will update the count value
+        String value = Integer.toString(count);
+        SharedPreferences saveCount = mContext.getSharedPreferences(PREFS_NAME3, 0);
+        SharedPreferences.Editor editor2 = saveCount.edit();
+        editor2.putString("count", value);
+        editor2.commit();
+
+        //this will update the time
+        SharedPreferences saveTime = mContext.getSharedPreferences(PREFS_NAME4, 0);
+        SharedPreferences.Editor editor3 = saveTime.edit();
+        editor3.putString("time", currDateTime2);
+        editor3.commit();
     }
 
     public void main() {
-        //This will get the initial values stored in the app/database
-        getEmailFrequency();
-        getEmailOptions();
+        //This updates the access variable
+        updateAccessVariable();
+        //This will get the initialize the information for the rest of the app to use
+        updateGlobalVar();
+
         SharedPreferences signoffCheck = mContext.getSharedPreferences(PREFS_NAME2, 0);
         signoff = signoffCheck.getString("checkSignoff", "False");
-        System.out.println("Frequency: " + emailFrequency + " Options: " + emailOptions + " Signoff: " + signoff + " Inside initialization activity");
-        getCount();
-        userName = usernameFromEmail(username1);
+        userName = usernameFromEmail(username2);
+        System.out.println(emailFrequency + " " + emailOptions + " " + count + " " + currDateTime2 + " " + accessVar);
 
         //This jumps to the corresponding method to perform the needed actions
-        if(signoff.equals("True") && !emailFrequency.equals("OnDemand"))
+        if(signoff.equals("True") && !emailFrequency.equals("Demand"))
             signOff();
         else {
             if (emailFrequency.equals("Min"))

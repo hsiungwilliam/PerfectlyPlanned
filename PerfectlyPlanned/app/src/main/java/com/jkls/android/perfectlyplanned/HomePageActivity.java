@@ -3,12 +3,15 @@ package com.jkls.android.perfectlyplanned;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -76,6 +79,8 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         mSettingsButton.setOnClickListener(this);
         mAccountsButton.setOnClickListener(this);
         mSignOffButton.setOnClickListener(this);
+
+        ActivityCompat.requestPermissions(HomePageActivity.this, new String[]{android.Manifest.permission.READ_SMS}, 1);
     }
 
     //Handles when the settings button is clicked
@@ -146,13 +151,14 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
                         System.out.println("checking email: " + e + " and password: " + p);
                         new CheckEmail(mContext, e, p, currDateTime1).execute("");
                     }
+                    if(emailOptions.equals("Both"))
+                        new CheckText(mContext, username1, password1, currDateTime1).execute("");
+                    Toast.makeText(mContext, "Checking Completed", Toast.LENGTH_SHORT).show();
                 }
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
                 }
             });
-            if(emailOptions.equals("Both"))
-                new CheckText(mContext, username1, password1, currDateTime1).execute("");
         }
         //updateCurrentDateTime();
     }
@@ -186,6 +192,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
     public void showSignOffButton(){
         try {
             Log.d(TAG, "signoff");
+            updateAccessVariable();
             //Im not sure if this is the best way but this lets the system know the user has signed off and turns off any alarms
             SharedPreferences settings = mContext.getSharedPreferences(PREFS_NAME, 0);
             SharedPreferences.Editor editor = settings.edit();
@@ -208,10 +215,40 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
             SharedPreferences clearFrequency = mContext.getSharedPreferences(PREFS_NAME3, 0);
             SharedPreferences.Editor editor3 = clearFrequency.edit();
             editor3.clear().commit();
+            SharedPreferences clearTime = mContext.getSharedPreferences(PREFS_NAME4, 0);
+            SharedPreferences.Editor editor4 = clearTime.edit();
+            editor4.clear().commit();
             finish();
             System.exit(0);
         }catch (Exception e) {
             Log.d(TAG, "Problem signing off");
+        }
+    }
+
+    public void updateAccessVariable(){
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        String username = usernameFromEmail(username1);
+        DatabaseReference myRef = database.child("users/" + username);
+        myRef.child("accessVar").setValue(false);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Toast.makeText(HomePageActivity.this, "Permission denied to read your Texts", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            // other 'case' lines to check for other
+            // permissions this app might request
         }
     }
 

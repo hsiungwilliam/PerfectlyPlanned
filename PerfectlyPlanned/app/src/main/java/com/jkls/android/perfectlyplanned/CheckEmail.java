@@ -344,6 +344,7 @@ public class CheckEmail extends AsyncTask{
             //close the store and folder objects
             emailFolder.close(false);
             store.close();
+            System.out.println("done with checking emails");
 
         } catch (NoSuchProviderException e) {
             e.printStackTrace();
@@ -367,7 +368,7 @@ public class CheckEmail extends AsyncTask{
         if(username1.contains("hotmail"))
             host = "imap.outlook.com";
         if(username1.contains("yahoo"))
-            host = "imap.yahoo.com";
+            host = "imap.mail.yahoo.com";
 
         String mailStoreType = "imaps";
         String email = username1;// change accordingly

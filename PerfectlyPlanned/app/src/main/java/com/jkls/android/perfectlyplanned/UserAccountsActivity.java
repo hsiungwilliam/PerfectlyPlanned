@@ -1,9 +1,11 @@
 package com.jkls.android.perfectlyplanned;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -27,6 +29,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by eande on 6/2/2017.
@@ -48,6 +51,7 @@ public class UserAccountsActivity extends AppCompatActivity implements View.OnCl
     String username1;
     String password1;
     String currDateTime1;
+    Boolean value;
     ArrayList<String> listItems = new ArrayList<String>();
     ArrayAdapter<String> adapter;
     String emailstr;
@@ -170,48 +174,72 @@ public class UserAccountsActivity extends AppCompatActivity implements View.OnCl
     //When the delete button gets clicked, which ever account was selected will be deleted from the database
     public void showDeleteButton(){
         Log.d(TAG, "Deleting an email account");
-
-        //This is getting the value and index of the selected item
-        SharedPreferences settings = mContext.getSharedPreferences(PREFS_NAME1, 0);
-        emailstr = settings.getString("email", "none");
-        String positionstr = settings.getString("posistion", "0");
-        System.out.println(emailstr + " " + positionstr);
-        int pos = Integer.parseInt(positionstr);
-
-        //This is deleting that item from the list
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems);
-        list.setAdapter(adapter);
-        listItems.remove(pos);
-        adapter.notifyDataSetChanged();
+        open(null);
+    }
 
-        //This is deleting that item from the database
-        String str = "/account" + Integer.toString(count-1);
-        String username = usernameFromEmail(username1);
-        DatabaseReference myRef = mRef.child("users/" + username + "/accounts");
-        myRef.child(str).addListenerForSingleValueEvent(new ValueEventListener() {
+    public void open(View view){
+        System.out.println("inside of open");
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage("Are you sure you want to delete this account?");
+        alertDialogBuilder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                dataSnapshot.child("email").getRef().removeValue();
-                dataSnapshot.child("password").getRef().removeValue();
-                dataSnapshot.getRef().removeValue();
+            public void onClick(DialogInterface arg0, int arg1) {
+                value = true;
+                System.out.println("you clicked yes, value: " + value);
+                //This is getting the value and index of the selected item
+                SharedPreferences settings = mContext.getSharedPreferences(PREFS_NAME1, 0);
+                emailstr = settings.getString("email", "none");
+                String positionstr = settings.getString("posistion", "0");
+                System.out.println(emailstr + " " + positionstr);
+                int pos = Integer.parseInt(positionstr);
+                //This is deleting that item from the list
+                list.setAdapter(adapter);
+                listItems.remove(pos);
+                adapter.notifyDataSetChanged();
+
+                //This is deleting that item from the database
+                String str = "/account" + Integer.toString(count-1);
+                String username = usernameFromEmail(username1);
+                DatabaseReference myRef = mRef.child("users/" + username + "/accounts");
+                myRef.child(str).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        dataSnapshot.child("/email").getRef().removeValue();
+                        dataSnapshot.child("/password").getRef().removeValue();
+                        dataSnapshot.getRef().removeValue();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+
+                //This is updating the count value inside the database
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+                String usernamestr = usernameFromEmail(username1);
+                DatabaseReference myRef0 = database.child("users/" + usernamestr);
+                int num = count - 1;
+                myRef0.child("count").setValue(num);
+
+                Intent in = new Intent(UserAccountsActivity.this, UserAccountsActivity.class);
+                in.putExtra("username", username1);
+                in.putExtra("password", password1);
+                in.putExtra("datetime", currDateTime1);
+                mContext.startActivity(in);
+                finish();
             }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
         });
-
-        //This is updating the count value inside the database
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        String usernamestr = usernameFromEmail(username1);
-        DatabaseReference myRef0 = database.child("users/" + usernamestr);
-        int num = count-1;
-        myRef0.child("count").setValue(num);
-
-        Intent in = new Intent(UserAccountsActivity.this, UserAccountsActivity.class);
-        in.putExtra("username", username1);
-        in.putExtra("password", password1);
-        in.putExtra("datetime", currDateTime1);
-        mContext.startActivity(in);
-        finish();
+        alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                value = false;
+                System.out.println("you clicked no, value: " + value);
+                return;
+            }
+        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
     @Override

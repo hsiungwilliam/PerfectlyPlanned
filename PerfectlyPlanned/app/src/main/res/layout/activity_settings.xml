@@ -209,6 +209,13 @@
         android:orientation="horizontal">
 
         <Button
+            android:id="@+id/button_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Delete Account" />
+
+        <Button
             android:id="@+id/button_update"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -222,16 +229,5 @@
             android:layout_weight="1"
             android:text="Exit" />
     </LinearLayout>
-
-    <EditText
-        android:id="@+id/editText7"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:gravity="center_horizontal"
-        android:hint="Add another account"
-        android:inputType="text|textEmailAddress"
-        android:maxLines="1"
-        tools:textSize="10sp" />
 
 </LinearLayout>

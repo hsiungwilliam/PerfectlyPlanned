@@ -111,8 +111,7 @@ public class AddEmailActivity extends AppCompatActivity implements View.OnClickL
     }
 
     public void getCount(){
-        String username = usernameFromEmail(username1);
-        DatabaseReference myRef1 = mRef.child("users/" + username);
+        DatabaseReference myRef1 = mRef.child("users/" + username1);
 
         myRef1.child("/count").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -134,7 +133,6 @@ public class AddEmailActivity extends AppCompatActivity implements View.OnClickL
 
         String email = mEmailField.getText().toString();
         String password = mPasswordField.getText().toString();
-        String username = usernameFromEmail(username1);
 
         //This part is adding the new account into the database
         String str = "/account" + Integer.toString(count);
@@ -142,7 +140,7 @@ public class AddEmailActivity extends AppCompatActivity implements View.OnClickL
         Map<String, Object> postValues = post.toMap();
 
         Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("users/" + username + "/accounts" + str, postValues);
+        childUpdates.put("users/" + username1 + "/accounts" + str, postValues);
         mRef.updateChildren(childUpdates);
 
         //this part is updating the count value in the database
@@ -177,16 +175,9 @@ public class AddEmailActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    private String usernameFromEmail(String email) {
-        if (email.contains("@")) {
-            return email.split("@")[0];
-        } else {return email;}
-    }
-
     public void updateCount(){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        String username = usernameFromEmail(username1);
-        DatabaseReference myRef = database.child("users/" + username);
+        DatabaseReference myRef = database.child("users/" + username1);
         count++;
         myRef.child("count").setValue(count);
 

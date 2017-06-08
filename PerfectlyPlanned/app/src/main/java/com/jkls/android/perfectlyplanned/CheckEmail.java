@@ -365,7 +365,7 @@ public class CheckEmail extends AsyncTask{
         String host = "";
         if(username1.contains("gmail"))
             host = "imap.gmail.com";// change accordingly
-        if(username1.contains("hotmail"))
+        if(username1.contains("outlook"))
             host = "imap.outlook.com";
         if(username1.contains("yahoo"))
             host = "imap.mail.yahoo.com";

@@ -26,13 +26,11 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     String username1;
     String password1;
     String currDateTime1;
-    String email1;
     int count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         username1 = getIntent().getStringExtra("username");
-        email1 = getIntent().getStringExtra("email");
         password1 = getIntent().getStringExtra("password");
         currDateTime1 = getIntent().getStringExtra("datetime");
         count = getIntent().getIntExtra("count", 0);
@@ -67,7 +65,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
             Log.d(TAG, "Going to user sign up");
             Intent in = new Intent(SignUpActivity.this, UserSignUpActivity.class);
             in.putExtra("username", username1);
-            in.putExtra("email", email1);
             in.putExtra("password", password1);
             in.putExtra("datetime", currDateTime1);
             in.putExtra("count", 0);
@@ -76,7 +73,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
             Log.d(TAG, "Going to vender sign up");
             Intent in = new Intent(SignUpActivity.this, VenderSignUpActivity.class);
             in.putExtra("username", username1);
-            in.putExtra("email", email1);
             in.putExtra("password", password1);
             in.putExtra("datetime", currDateTime1);
             in.putExtra("count", 0);
@@ -91,7 +87,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
     public void exitButton(){
         Intent in = new Intent(SignUpActivity.this, SignInActivity.class);
-        in.putExtra("username", email1);
+        in.putExtra("username", username1);
         in.putExtra("password", password1);
         in.putExtra("datetime", currDateTime1);
         mContext.startActivity(in);

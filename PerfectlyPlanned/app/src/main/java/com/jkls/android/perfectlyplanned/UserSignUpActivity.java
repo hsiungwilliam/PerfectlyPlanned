@@ -22,7 +22,9 @@ import android.widget.Toast;
 import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.database.DatabaseReference;
@@ -65,7 +67,6 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
 
     private Context mContext;
     String username1;
-    String email1;
     String password1;
     String currDateTime1;
     String emailOptions;
@@ -77,7 +78,6 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         username1 = getIntent().getStringExtra("username");
-        email1 = getIntent().getStringExtra("email");
         password1 = getIntent().getStringExtra("password");
         currDateTime1 = getIntent().getStringExtra("datetime");
         count = getIntent().getIntExtra("count", 0);
@@ -225,7 +225,6 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         //This section is just refreshing the user sign up page
         Intent in = new Intent(UserSignUpActivity.this, UserSignUpActivity.class);
         in.putExtra("username", username1);
-        in.putExtra("email", email1);
         in.putExtra("password", password1);
         in.putExtra("datetime", currDateTime1);
         in.putExtra("count", count);
@@ -245,16 +244,25 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         SharedPreferences.Editor editor1 = passwords.edit();
         editor1.clear().commit();
 
-        //
-        //This will remove the username and userId from the database since it will not be used
-        //
-
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-        Query userQuery = ref.child("users").equalTo(username1);
-        userQuery.getRef().removeValue();
+        //This is deleting the account from the Authentication
+        final FirebaseUser currentUser = mAuth.getCurrentUser();
+        AuthCredential credential = EmailAuthProvider.getCredential(username1, password1);
+        currentUser.reauthenticate(credential).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                currentUser.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "User account deleted.");
+                        }
+                    }
+                });
+            }
+        });
 
         Intent in = new Intent(UserSignUpActivity.this, SignInActivity.class);
-        in.putExtra("username", email1);
+        in.putExtra("username", username1);
         in.putExtra("password", password1);
         in.putExtra("datetime", currDateTime1);
         mContext.startActivity(in);
@@ -294,10 +302,10 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         SharedPreferences.Editor editor3 = passwords1.edit();
         editor3.clear().commit();
 
-        new InitializationActivity(mContext, email1, password1, currDateTime1, false).execute("");
+        new InitializationActivity(mContext, username1, password1, currDateTime1, false).execute("");
 
         Intent in = new Intent(UserSignUpActivity.this, HomePageActivity.class);
-        in.putExtra("username", email1);
+        in.putExtra("username", username1);
         in.putExtra("password", password1);
         in.putExtra("datetime", currDateTime1);
         mContext.startActivity(in);
@@ -387,7 +395,7 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
 
     private void updateSettings(){
         String currentDateTime = new Date().toString();
-        Post post = new Post(username1, email1, currentDateTime, freq, opt, count);
+        Post post = new Post(username1, currentDateTime, freq, opt, count);
         Map<String, Object> postValues = post.toMap();
 
         Map<String, Object> childUpdates = new HashMap<>();
@@ -418,7 +426,6 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
 
     @IgnoreExtraProperties
     public class Post {
-        public String uid;
         public String username;
         public String currentDateTime;
         public String freq;
@@ -427,8 +434,7 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
 
         public Post() {// Default constructor required for calls to DataSnapshot.getValue(Post.class)
         }
-        public Post(String uid, String username, String currentDateTime, String freq, String opt, int count) {
-            this.uid = uid;
+        public Post(String username, String currentDateTime, String freq, String opt, int count) {
             this.username = username;
             this.currentDateTime = currentDateTime;
             this.freq = freq;
@@ -439,7 +445,6 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         public Map<String, Object> toMap() {
             System.out.println("inside map");
             HashMap<String, Object> result = new HashMap<>();
-            result.put("uid", uid);
             result.put("username", username);
             result.put("currentDateTime", currentDateTime);
             result.put("freq", freq);

@@ -95,12 +95,6 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         finish();
     }
 
-    private String usernameFromEmail(String email) {
-        if (email.contains("@")) {
-            return email.split("@")[0];
-        } else {return email;}
-    }
-
     public void getCount(){
         SharedPreferences emailCount = getSharedPreferences(PREFS_NAME2, 0);
         String value = emailCount.getString("count", "0");
@@ -114,9 +108,8 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
 
     public void updateCurrentDateTime(){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        String username = usernameFromEmail(username1);
         String currentDateTime = new Date().toString();
-        DatabaseReference myRef = database.child("users/" + username);
+        DatabaseReference myRef = database.child("users/" + username1);
         myRef.child("currentDateTime").setValue(currentDateTime);
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME4, 0);
@@ -131,7 +124,6 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         Log.d(TAG, "check");
         getCount();
         getEmailOptions();
-        String username = usernameFromEmail(username1);
         System.out.println("inside of check button, count: " + count + " email options: " + emailOptions);
 
         if (emailOptions.equals("Text"))
@@ -139,7 +131,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         else if(emailOptions.equals("Email") || emailOptions.equals("Both")) {
             //This will get the values from the database for the username and password
             DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-            DatabaseReference myRef = database.child("users/" + username);
+            DatabaseReference myRef = database.child("users/" + username1);
             myRef.child("/accounts").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -227,8 +219,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
 
     public void updateAccessVariable(){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        String username = usernameFromEmail(username1);
-        DatabaseReference myRef = database.child("users/" + username);
+        DatabaseReference myRef = database.child("users/" + username1);
         myRef.child("accessVar").setValue(false);
     }
 

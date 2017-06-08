@@ -99,8 +99,7 @@ public class UserAccountsActivity extends AppCompatActivity implements View.OnCl
         displayList();
     }
     public void getCount(){
-        String username = usernameFromEmail(username1);
-        DatabaseReference myRef1 = mRef.child("users/" + username);
+        DatabaseReference myRef1 = mRef.child("users/" + username1);
 
         myRef1.child("/count").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -114,8 +113,7 @@ public class UserAccountsActivity extends AppCompatActivity implements View.OnCl
     }
 
     public void displayList(){
-        String username = usernameFromEmail(username1);
-        DatabaseReference myRef = mRef.child("users/" + username);
+        DatabaseReference myRef = mRef.child("users/" + username1);
 
         myRef.child("/accounts").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -140,12 +138,6 @@ public class UserAccountsActivity extends AppCompatActivity implements View.OnCl
         listItems.add(e);
         // next thing you have to do is check if your adapter has changed
         adapter.notifyDataSetChanged();
-    }
-
-    private String usernameFromEmail(String email) {
-        if (email.contains("@")) {
-            return email.split("@")[0];
-        } else {return email;}
     }
 
     //When the add button gets clicked, another page pops up for you to add another email account
@@ -200,8 +192,7 @@ public class UserAccountsActivity extends AppCompatActivity implements View.OnCl
 
                 //This is deleting that item from the database
                 String str = "/account" + Integer.toString(count-1);
-                String username = usernameFromEmail(username1);
-                DatabaseReference myRef = mRef.child("users/" + username + "/accounts");
+                DatabaseReference myRef = mRef.child("users/" + username1 + "/accounts");
                 myRef.child(str).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -217,8 +208,7 @@ public class UserAccountsActivity extends AppCompatActivity implements View.OnCl
 
                 //This is updating the count value inside the database
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-                String usernamestr = usernameFromEmail(username1);
-                DatabaseReference myRef0 = database.child("users/" + usernamestr);
+                DatabaseReference myRef0 = database.child("users/" + username1);
                 int num = count - 1;
                 myRef0.child("count").setValue(num);
 

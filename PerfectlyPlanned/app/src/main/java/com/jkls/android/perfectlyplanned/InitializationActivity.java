@@ -34,7 +34,6 @@ public class InitializationActivity extends AsyncTask{
     private static final String TAG = "InitializationActivity";
     private DatabaseReference mRef;
     String signoff;
-    static String userName;
     static String username2;
     static String password2;
     static String currDateTime2;
@@ -97,12 +96,6 @@ public class InitializationActivity extends AsyncTask{
         }
     }
 
-    private String usernameFromEmail(String email) {
-        if (email.contains("@")) {
-            return email.split("@")[0];
-        } else {return email;}
-    }
-
     //When an alarm is on, this is where it goes to check the emails
     public static class goToCheckEmailText extends BroadcastReceiver {
         public goToCheckEmailText() {}
@@ -116,7 +109,7 @@ public class InitializationActivity extends AsyncTask{
             else if(emailOptions.equals("Email") || emailOptions.equals("Both")) {
                 //This will get the values from the database for the username and password
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-                DatabaseReference myRef = database.child("users/" + userName);
+                DatabaseReference myRef = database.child("users/" + username2);
 
                 myRef.child("/accounts").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -144,7 +137,7 @@ public class InitializationActivity extends AsyncTask{
         public void updateCurrentDateTime(){
             DatabaseReference database = FirebaseDatabase.getInstance().getReference();
             String currentDateTime = new Date().toString();
-            DatabaseReference myRef = database.child("users/" + userName);
+            DatabaseReference myRef = database.child("users/" + username2);
             myRef.child("currentDateTime").setValue(currentDateTime);
 
             SharedPreferences settings = mContext.getSharedPreferences(PREFS_NAME4, 0);
@@ -195,25 +188,7 @@ public class InitializationActivity extends AsyncTask{
 
     public void getDBInfo(){
         System.out.println("inside get DB info");
-        String username = usernameFromEmail(username2);
-        DatabaseReference myRef1 = mRef.child("users/" + username);
-
-        /*myRef1.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                System.out.println("inside the add listener");
-                emailFrequency = dataSnapshot.child("/freq").getValue().toString();
-                emailOptions = dataSnapshot.child("/opt").getValue().toString();
-                count = Integer.parseInt(dataSnapshot.child("/email").getValue().toString());
-                currDateTime2 = dataSnapshot.child("/currentDateTime").getValue().toString();
-                accessVar = Boolean.parseBoolean(dataSnapshot.child("/accessVar").getValue().toString());
-                System.out.println(emailFrequency + " " + emailOptions + " " + count + " " + currDateTime2 + " " + accessVar);
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });*/
-
-
+        DatabaseReference myRef1 = mRef.child("users/" + username2);
         Query topPostsQuery = myRef1;
         final DatabaseReference allUsersRef = myRef1;
 
@@ -244,8 +219,7 @@ public class InitializationActivity extends AsyncTask{
     public void updateAccessVariable(){
         System.out.println("inside update access variable");
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        String username = usernameFromEmail(username2);
-        DatabaseReference myRef = database.child("users/" + username);
+        DatabaseReference myRef = database.child("users/" + username2);
         myRef.child("/accessVar").setValue(true);
     }
 
@@ -284,7 +258,6 @@ public class InitializationActivity extends AsyncTask{
 
         SharedPreferences signoffCheck = mContext.getSharedPreferences(PREFS_NAME2, 0);
         signoff = signoffCheck.getString("checkSignoff", "False");
-        userName = usernameFromEmail(username2);
         System.out.println(emailFrequency + " " + emailOptions + " " + count + " " + currDateTime2 + " " + accessVar);
 
         //This jumps to the corresponding method to perform the needed actions

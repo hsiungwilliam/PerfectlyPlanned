@@ -118,20 +118,15 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         if (!validateForm()) {
             return;
         }
-
-      //  showProgressDialog();
         String email = mEmailField.getText().toString();
         String password = mPasswordField.getText().toString();
         user_name = email;
-        //user_name = "jkls2713@gmail.com";
+        email = email + "@PerfectlyPlanned.com";
         pass_word = password;
-        //pass_word = "sticks27";
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.d(TAG, "signIn:onComplete:" + task.isSuccessful());
-              //  hideProgressDialog();
-
                 if (task.isSuccessful()) {
                     //Gets the current date and time to be used for comparison later
                     currentDateTime = new Date().toString();
@@ -150,18 +145,15 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         if (!validateForm()) {
             return;
         }
-
-       // showProgressDialog();
         String email = mEmailField.getText().toString();
         String password = mPasswordField.getText().toString();
         user_name = email;
+        email = email + "@PerfectlyPlanned.com";
         pass_word = password;
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.d(TAG, "createUser:onComplete:" + task.isSuccessful());
-               // hideProgressDialog();
-
                 if (task.isSuccessful()) {
                     //Gets the current date and time to be used for comparison later
                     String currentDateTime = new Date().toString();
@@ -195,39 +187,20 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
     //This is for users that need to sign up
     private void onAuthSuccessSignUp(FirebaseUser user, String currDateTime) {
-        String username = usernameFromEmail(user.getEmail());
+        //String username = usernameFromEmail(user.getEmail());
         // Go to MainActivity
         Intent i = new Intent(SignInActivity.this, CheckEmail.class);
         i.putExtra("email", user.getEmail());
 
         Context temp = getBaseContext();
         Intent in = new Intent(SignInActivity.this, SignUpActivity.class);
-        in.putExtra("username", username);
-        in.putExtra("email", user_name);
+        //in.putExtra("username", username);
+        in.putExtra("username", user_name);
         in.putExtra("password", pass_word);
         in.putExtra("datetime", currDateTime);
         in.putExtra("count", 0);
         temp.startActivity(in);
         finish();
-    }
-
-    public class User {
-        public String username;
-        public String email;
-        public User() {// Default constructor required for calls to DataSnapshot.getValue(User.class)
-        }
-        public User(String username, String email) {
-            this.username = username;
-            this.email = email;
-        }
-    }
-
-    private String usernameFromEmail(String email) {
-        if (email.contains("@")) {
-            return email.split("@")[0];
-        } else {
-            return email;
-        }
     }
 
     private boolean validateForm() {

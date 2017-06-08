@@ -3,15 +3,19 @@ package com.jkls.android.perfectlyplanned;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -20,9 +24,17 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
 import java.util.Date;
@@ -38,11 +50,13 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     private static final String TAG = "SettingActivity";
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
+    private DatabaseReference mRef;
 
     private EditText mBlackField;
     private EditText mWhiteField;
     private Button mUpdateButton;
     private Button mExitButton;
+    private Button mDeleteButton;
     private RadioButton mEmailRButton;
     private RadioButton mTextRButton;
     private RadioButton mBothRButton;
@@ -70,18 +84,19 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         password1 = getIntent().getStringExtra("password");
         currDateTime1 = getIntent().getStringExtra("datetime");
         mContext = getBaseContext();
-        System.out.println(username1 + "settings activity");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
+        mRef = FirebaseDatabase.getInstance().getReference();
 
         // Views
         mBlackField = (EditText) findViewById(R.id.field_black);
         mWhiteField = (EditText) findViewById(R.id.field_white);
         mUpdateButton = (Button) findViewById(R.id.button_update);
         mExitButton = (Button) findViewById(R.id.button_exit);
+        mDeleteButton = (Button) findViewById(R.id.button_delete);
         mEmailRButton = (RadioButton) findViewById(R.id.button_email);
         mTextRButton = (RadioButton) findViewById(R.id.button_text);
         mBothRButton = (RadioButton) findViewById(R.id.button_both);
@@ -110,6 +125,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         // Click listeners
         mUpdateButton.setOnClickListener(this);
         mExitButton.setOnClickListener(this);
+        mDeleteButton.setOnClickListener(this);
 
         //This ensure the keyboard will not pop up when the page does, only when you click on editText
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -289,26 +305,79 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         mDemandRButton.setChecked(true);
     }
 
-    private String usernameFromEmail(String email) {
-        if (email.contains("@")) {
-            return email.split("@")[0];
-        } else {return email;}
-    }
-
     public void updateFreq(String value){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        String username = usernameFromEmail(username1);
-        String currentDateTime = new Date().toString();
-        DatabaseReference myRef = database.child("users/" + username);
+        DatabaseReference myRef = database.child("users/" + username1);
         myRef.child("freq").setValue(value);
     }
 
     public void updateOpt(String value){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        String username = usernameFromEmail(username1);
-        String currentDateTime = new Date().toString();
-        DatabaseReference myRef = database.child("users/" + username);
+        DatabaseReference myRef = database.child("users/" + username1);
         myRef.child("opt").setValue(value);
+    }
+
+    //This will delete the users account if the user selects yes from the pop up window
+    public void delete(){
+        Log.d(TAG, "Deleting an email account");
+        open(null);
+    }
+
+    public void open(View view){
+        System.out.println("inside of open");
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage("Are you sure you want to delete this account?");
+        alertDialogBuilder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                System.out.println("you clicked yes, the account is being deleted");
+                //This is deleting the account from the Authentication
+                final FirebaseUser currentUser = mAuth.getCurrentUser();
+                AuthCredential credential = EmailAuthProvider.getCredential(username1, password1);
+                currentUser.reauthenticate(credential).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        currentUser.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Log.d(TAG, "User account deleted.");
+                                }
+                            }
+                        });
+                    }
+                });
+
+                //This is deleting the account from the database
+                DatabaseReference myRef = mRef.child("users/" + username1);
+                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        dataSnapshot.getRef().removeValue();
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+
+                //This returns the user to the sign in page
+                Intent in = new Intent(SettingActivity.this, SignInActivity.class);
+                in.putExtra("username", username1);
+                in.putExtra("password", password1);
+                in.putExtra("datetime", currDateTime1);
+                mContext.startActivity(in);
+                finish();
+            }
+        });
+        alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                System.out.println("you clicked no, the account is not being deleted");
+                return;
+            }
+        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
     @Override
@@ -318,6 +387,8 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             update();
         } else if (i == R.id.button_exit) {
             exit();
+        } else if (i == R.id.button_delete){
+            delete();
         }
     }
 }

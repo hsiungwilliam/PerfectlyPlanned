@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="61dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"></LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView19"
+        tools:textSize="36sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|center_horizontal"
+        android:text="Template Email"
+        android:textColor="@android:color/black"
+        android:textSize="36sp"
+        android:textStyle="bold|italic" />
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="336dp"
+        android:layout_height="298dp"
+        android:layout_gravity="center"
+        android:elegantTextHeight="false"
+        android:hint="To whom it may concern, Your check up with Dr. <name> is coming up in 1 week. This was sent through Perfectly Planned(r)."
+        android:inputType="text"
+        android:isScrollContainer="false"
+        android:keepScreenOn="false"
+        android:maxLines="10"
+        android:visibility="visible" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:text="Back" />
+
+        <LinearLayout
+            android:layout_width="46dp"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"></LinearLayout>
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.06"
+            android:text="Next" />
+    </LinearLayout>
+
+</LinearLayout>

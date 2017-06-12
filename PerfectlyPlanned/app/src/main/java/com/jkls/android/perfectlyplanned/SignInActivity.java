@@ -59,6 +59,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         pass_word = onExit.getString("password", "sticks27");
         currentDateTime = onExit.getString("currdatetime", "Mon Jan 01 08:00:00 EDT 2000");
 
+        //If the last button clicked was signoff then the app needs to recollect all the information
         if(onExitPage.equals("Signoff")) {
             setContentView(R.layout.activity_sign_in);
             mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -92,6 +93,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 }
             });
         } else{
+            //If the user did not signoff last, then the app still has all the saved information since the user is still signed in and can go straight to the home page
             new InitializationActivity(getBaseContext(), user_name, pass_word, currentDateTime, false).execute("");
 
             Context temp = getBaseContext();
@@ -203,6 +205,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         finish();
     }
 
+    //this makes sure that the user typed in a valid username and password
     private boolean validateForm() {
         boolean result = true;
         if (TextUtils.isEmpty(mEmailField.getText().toString())) {

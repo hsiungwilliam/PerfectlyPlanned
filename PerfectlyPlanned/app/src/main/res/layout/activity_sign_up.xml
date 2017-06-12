@@ -6,85 +6,97 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/imageView5"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="78dp"
-        android:layout_gravity="center_vertical|center"
-        android:adjustViewBounds="true"
-        app:srcCompat="@drawable/logo_small" />
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textView16"
-        tools:textSize="36sp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical|center_horizontal"
-        android:text="Sign Up"
-        android:textColor="@android:color/black"
-        android:textSize="36sp"
-        android:textStyle="bold|italic" />
-
-    <TextView
-        android:id="@+id/textView17"
-        tools:elevation="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="15dp"
-        android:paddingTop="20dp"
-        android:text="Will you be creating an account as a user or a vender?"
-        android:textSize="18sp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <RadioButton
-            android:id="@+id/button_user"
-            tools:checked="false"
-            tools:clickable="true"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:allowUndo="true"
-            android:onClick="showUserButtonHandler"
-            android:text="User"
-            android:textSize="18sp" />
+            android:orientation="vertical" >
 
-        <RadioButton
-            android:id="@+id/button_vender"
-            tools:clickable="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:allowUndo="true"
-            android:onClick="showVenderButtonHandler"
-            android:text="Vender"
-            android:textSize="18sp" />
+            <ImageView
+                android:id="@+id/imageView8"
+                android:layout_width="match_parent"
+                android:layout_height="78dp"
+                android:layout_gravity="center_vertical|center"
+                android:adjustViewBounds="true"
+                app:srcCompat="@drawable/logo_small" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/textView14"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="Sign Up"
+                android:textColor="@android:color/black"
+                android:textSize="36sp"
+                android:textStyle="bold|italic"
+                tools:textSize="36sp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
+            <TextView
+                android:id="@+id/textView19"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="15dp"
+                android:paddingTop="20dp"
+                android:text="Will you be creating an account as a user or a vender?"
+                android:textSize="18sp"
+                tools:elevation="10dp" />
 
-        <Button
-            android:id="@+id/button_continue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:layout_weight="1"
-            android:text="Continue" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/button_exit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:layout_weight="1"
-            android:text="Exit" />
-    </LinearLayout>
+                <RadioButton
+                    android:id="@+id/button_user"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:allowUndo="true"
+                    android:onClick="showUserButtonHandler"
+                    android:text="User"
+                    android:textSize="18sp"
+                    tools:checked="false"
+                    tools:clickable="true" />
+
+                <RadioButton
+                    android:id="@+id/button_vender"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:allowUndo="true"
+                    android:onClick="showVenderButtonHandler"
+                    android:text="Vender"
+                    android:textSize="18sp"
+                    tools:clickable="true" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/button_continue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:layout_weight="1"
+                    android:text="Continue" />
+
+                <Button
+                    android:id="@+id/button_exit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:layout_weight="1"
+                    android:text="Exit" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

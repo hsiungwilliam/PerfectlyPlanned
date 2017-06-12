@@ -112,7 +112,6 @@ public class AddEmailActivity extends AppCompatActivity implements View.OnClickL
 
     public void getCount(){
         DatabaseReference myRef1 = mRef.child("users/" + username1);
-
         myRef1.child("/count").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -175,6 +174,7 @@ public class AddEmailActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+    //Updates the count information
     public void updateCount(){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
         DatabaseReference myRef = database.child("users/" + username1);
@@ -193,6 +193,7 @@ public class AddEmailActivity extends AppCompatActivity implements View.OnClickL
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
+    //Makes sure there is both a valid email and password provided
     private boolean validateForm() {
         boolean result = true;
         if (TextUtils.isEmpty(mEmailField.getText().toString())) {

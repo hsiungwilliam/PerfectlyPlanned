@@ -317,6 +317,7 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
+    //this makes sure that the email account information is valid
     private boolean validateForm() {
         boolean result = true;
         if (TextUtils.isEmpty(mEmailField.getText().toString())) {
@@ -393,6 +394,7 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
+    //this places all the saved information into the database
     private void updateSettings(){
         String currentDateTime = new Date().toString();
         Post post = new Post(username1, currentDateTime, freq, opt, count);
@@ -450,6 +452,8 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
             result.put("freq", freq);
             result.put("opt", opt);
             result.put("count", count);
+            result.put("blackListCount", 0);
+            result.put("whiteListCount", 0);
             result.put("accessVar", true);
             return result;
         }

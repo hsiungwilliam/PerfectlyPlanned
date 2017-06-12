@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import android.os.Handler;
 
 
 /**
@@ -43,6 +44,7 @@ public class CheckText extends AsyncTask {
     String loc;
     String time;
     String from;
+    Handler mHandler;
     public static final String PREFS_NAME = "MyTimeFile";
     private static final String TAG = "CheckText";
 
@@ -52,6 +54,7 @@ public class CheckText extends AsyncTask {
         username1 = user_name;
         password1 = pass_word;
         currDateTime1 = currDateTime;
+        mHandler = new Handler();
     }
 
     public  void displayNotification(Context context, int ID) {
@@ -86,6 +89,7 @@ public class CheckText extends AsyncTask {
         currDateTime2 = getTime.getString("time", "Sun Jan 01 08:00:00 EDT 2017");
     }
 
+    //This checks every incoming text to see if there is an event
     public void check() {
         SimpleDateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss z yyyy");
         try{
@@ -118,6 +122,7 @@ public class CheckText extends AsyncTask {
                     Date currDate = format.parse(currentDate);
                     System.out.println(currDate);
 
+                    //This makes sure the app only checks texts that have been received since the last check
                     if(currDate.before(lastdate)) {
                         break;
                     }
@@ -185,10 +190,21 @@ public class CheckText extends AsyncTask {
         public void setBody(String body) {this.body = body;}
     }
 
+    //When the check has completed, a toast will appear letting the user know
+    protected void onHandleIntent() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(mContext, "Text Check Complete", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     @Override
     protected Object doInBackground(Object[] params) {
         System.out.println("inside check texts background");
         check();
+        onHandleIntent();
         return null;
     }
 }

@@ -34,6 +34,12 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
     public static final String PREFS_NAME1 = "MyCheckOptionsFile";
     public static final String PREFS_NAME3 = "MyEmailFrequencyFile";
     public static final String PREFS_NAME4 = "MyTimeFile";
+    public static final String PREFS_NAME5 = "MyBlackListFile";
+    public static final String PREFS_NAME6 = "MyWhiteListFile";
+    public static final String PREFS_NAME7 = "MyTempBListFile";
+    public static final String PREFS_NAME8 = "MyTempWListFile";
+    public static final String PREFS_NAME9 = "MyBListFile";
+    public static final String PREFS_NAME10 = "MyWListFile";
 
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
@@ -80,6 +86,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         mAccountsButton.setOnClickListener(this);
         mSignOffButton.setOnClickListener(this);
 
+        //This will pop up a window asking if its ok if the app accesses your text messages
         ActivityCompat.requestPermissions(HomePageActivity.this, new String[]{android.Manifest.permission.READ_SMS}, 1);
     }
 
@@ -145,7 +152,6 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
                     }
                     if(emailOptions.equals("Both"))
                         new CheckText(mContext, username1, password1, currDateTime1).execute("");
-                    Toast.makeText(mContext, "Checking Completed", Toast.LENGTH_SHORT).show();
                 }
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
@@ -197,7 +203,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
             editor.putString("checkSignoff", "False");
             editor.commit();
 
-            //This is to clear all the saved values
+            //This is to clear all the saved values inside the app
             SharedPreferences clearCheckOptions = mContext.getSharedPreferences(PREFS_NAME1, 0);
             SharedPreferences.Editor editor1 = clearCheckOptions.edit();
             editor1.clear().commit();
@@ -210,6 +216,25 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
             SharedPreferences clearTime = mContext.getSharedPreferences(PREFS_NAME4, 0);
             SharedPreferences.Editor editor4 = clearTime.edit();
             editor4.clear().commit();
+            SharedPreferences clearBlackListCount = mContext.getSharedPreferences(PREFS_NAME5, 0);
+            SharedPreferences.Editor editor5 = clearBlackListCount.edit();
+            editor5.clear().commit();
+            SharedPreferences clearWhiteListCount = mContext.getSharedPreferences(PREFS_NAME6, 0);
+            SharedPreferences.Editor editor6 = clearWhiteListCount.edit();
+            editor6.clear().commit();
+            SharedPreferences clearBlackListPlaceHolder = mContext.getSharedPreferences(PREFS_NAME7, 0);
+            SharedPreferences.Editor editor7 = clearBlackListPlaceHolder.edit();
+            editor7.clear().commit();
+            SharedPreferences clearWhiteListPlaceHolder = mContext.getSharedPreferences(PREFS_NAME8, 0);
+            SharedPreferences.Editor editor8 = clearWhiteListPlaceHolder.edit();
+            editor8.clear().commit();
+            SharedPreferences clearBlackList = mContext.getSharedPreferences(PREFS_NAME9, 0);
+            SharedPreferences.Editor editor9 = clearBlackList.edit();
+            editor9.clear().commit();
+            SharedPreferences clearWhiteList = mContext.getSharedPreferences(PREFS_NAME10, 0);
+            SharedPreferences.Editor editor10 = clearWhiteList.edit();
+            editor10.clear().commit();
+
             finish();
             System.exit(0);
         }catch (Exception e) {
@@ -217,6 +242,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+    //This variable was used to purposely update the database to be able to access it, but there is not need for it anymore
     public void updateAccessVariable(){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
         DatabaseReference myRef = database.child("users/" + username1);
@@ -226,20 +252,18 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case 1: {
-                // If request is cancelled, the result arrays are empty.
+            // If request is cancelled, the result arrays are empty.
+            case 1:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
+                    // permission was granted. Do the contacts-related task you need to do.
                 } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    // permission denied. Disable the functionality that depends on this permission.
                     Toast.makeText(HomePageActivity.this, "Permission denied to read your Texts", Toast.LENGTH_SHORT).show();
                 }
-                return;
-            }
-            // other 'case' lines to check for other
-            // permissions this app might request
+                break;
+            // other 'case' lines to check for other permissions this app might request
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 

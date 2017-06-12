@@ -124,7 +124,6 @@ public class InitializationActivity extends AsyncTask{
                         }
                         if(emailOptions.equals("Both"))
                             new CheckText(mContext, username2, password2, currDateTime2).execute("");
-                        Toast.makeText(mContext, "Checking Completed", Toast.LENGTH_SHORT).show();
                     }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
@@ -216,6 +215,7 @@ public class InitializationActivity extends AsyncTask{
         });
     }
 
+    //This variable was used to purposely update the database to be able to access it, but there is not need for it anymore
     public void updateAccessVariable(){
         System.out.println("inside update access variable");
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();

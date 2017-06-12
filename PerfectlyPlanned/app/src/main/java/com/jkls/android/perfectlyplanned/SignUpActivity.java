@@ -50,11 +50,13 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         mExitButton.setOnClickListener(this);
     }
 
+    //the user has clicked user and will be taken to the user sign up page
     public void showUserButtonHandler(View v){
         mVenderRButton.setChecked(false);
         mUserRButton.setChecked(true);
     }
 
+    //the user has decided to be a vender and will be take to the vender sign up page
     public void showVenderButtonHandler(View v){
         mUserRButton.setChecked(false);
         mVenderRButton.setChecked(true);
@@ -85,6 +87,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         finish();
     }
 
+    //when exiting no information is saved and the user is taken back to the sign in page
     public void exitButton(){
         Intent in = new Intent(SignUpActivity.this, SignInActivity.class);
         in.putExtra("username", username1);

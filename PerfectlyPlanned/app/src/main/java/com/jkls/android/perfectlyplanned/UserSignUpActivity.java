@@ -396,7 +396,7 @@ public class UserSignUpActivity extends AppCompatActivity implements View.OnClic
 
     //this places all the saved information into the database
     private void updateSettings(){
-        String currentDateTime = new Date().toString();
+        String currentDateTime = "Sun Jan 01 08:00:0 EDT 2017";
         Post post = new Post(username1, currentDateTime, freq, opt, count);
         Map<String, Object> postValues = post.toMap();
 

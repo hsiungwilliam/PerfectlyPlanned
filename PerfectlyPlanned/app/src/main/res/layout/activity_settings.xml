@@ -137,7 +137,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="15dp"
                 android:paddingTop="10dp"
-                android:text="Except all events from:" />
+                android:text="Accept all events from:" />
 
             <ListView
                 android:id="@+id/list_white"
@@ -172,7 +172,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="15dp"
                 android:paddingTop="10dp"
-                android:text="Except no events from:" />
+                android:text="Accept no events from:" />
 
             <ListView
                 android:id="@+id/list_black"

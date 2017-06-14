@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="1">
 
@@ -33,7 +35,7 @@
         android:layout_height="298dp"
         android:layout_gravity="center"
         android:elegantTextHeight="false"
-        android:hint="To whom it may concern, Your check up with Dr. <name> is coming up in 1 week. This was sent through Perfectly Planned(r)."
+        android:hint="To whom it may concern, Your check up with Dr. (name) is coming up in 1 week. This was sent through Perfectly Planned(r)."
         android:inputType="text"
         android:isScrollContainer="false"
         android:keepScreenOn="false"
